@@ -1,96 +1,116 @@
-# 📚 Math Information Retrieval System
+# ![Math Information Retrieval System Banner](A_2D_digital_graphic_design_banner_for_a_"Math_Inf.png)
 
-[![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)](https://www.python.org)
-[![License](https://img.shields.io/badge/License-Proprietary-red)](#-license)
+# Math Information Retrieval System
 
-A **cross-platform Math Search Engine** with a **Flutter frontend** and **FastAPI backend**.  
-It enables users to search mathematical expressions (LaTeX or MathML), retrieve relevant documents, and view them seamlessly on **Android APK** and **Web browsers**.
+This repository contains **both** the Flutter frontend and the FastAPI backend for a **Clustering-Based Mathematical Information Retrieval (MathIR)** system.
+
+It supports **LaTeX/MathML search**, **cross-platform rendering**, and **fast retrieval** of mathematical documents.
 
 ---
 
-## ✨ Features
+## 📌 Features
 
 ### Frontend (Flutter)
-- 🔍 Search using LaTeX or plain math expressions  
-- 📄 Render HTML with **MathML** correctly on both Android and Web  
-- 💡 **WebView** for Android, **iframe + MathJax** for Web  
-- ⏱ Display response time and result count  
-- ✅ Clean UI with animations, loading indicators, and error handling  
+
+* 🔍 Search LaTeX or math expressions
+* 📄 Render HTML with MathML on Android and Web
+* 💡 WebView for Android, iframe + MathJax for Web
+* ⏱ Show response time and result count
+* ✅ Clean UI with animation, loading indicators, and error handling
 
 ### Backend (FastAPI)
-- ⚡ Bit-vector encoding for math expressions  
-- 📊 MiniBatchKMeans clustering with Hamming distance  
-- 🚀 High-speed approximate nearest neighbor (ANN) search  
-- 📦 Persistent index storage for instant startup  
+
+* ⚡ Cluster-based approximate nearest neighbor (ANN) search
+* 🔢 MiniBatchKMeans with Hamming distance for binary bit-vectors
+* 📂 Preprocessing of HTML to extract MathML & LaTeX
+* 🚀 Scalable and optimized for large datasets
+
+---
+
+## 📁 Directory Structure
+
+<pre lang="md">
+📦 math-ir-system
+┣ 📂 frontend
+┃ ┣ 📜 main.dart                  # Main search UI and routing logic
+┃ ┣ 📜 mobile_html_viewer.dart    # WebView-based HTML renderer for Android
+┃ ┣ 📜 web_html_viewer.dart       # iframe-based HTML renderer for Web
+┃ ┗ 📜 pubspec.yaml               # Flutter dependencies
+┃
+┣ 📂 backend
+┃ ┣ 📂 MIR_model
+┃ ┃ ┣ 📜 cluster_index.py          # Handles cluster index loading and searching
+┃ ┃ ┣ 📜 clustering_phase.py       # Performs clustering on bit-vector data
+┃ ┃ ┣ 📜 driver_clustering.py      # Triggers clustering and index creation
+┃ ┃ ┣ 📜 driver_preprocessing.py   # Preprocesses HTML documents
+┃ ┃ ┣ 📜 hamming_mini_batch_kmeans.py  # MiniBatchKMeans adapted for Hamming distance
+┃ ┃ ┣ 📜 preprocessing.py          # Extracts MathML & LaTeX, generates bit-vectors
+┃ ┃ ┣ 📜 query_processing.py       # Identifies query type and processes
+┃ ┃ ┣ 📜 query_to_bitvector.py     # Converts LaTeX → MathML → bit-vector
+┃ ┃ ┣ 📜 search_query.py           # Main search execution logic
+┃ ┣ 📜 main.py                     # FastAPI entry point
+┃ ┗ 📂 math_index_storage          # Stores models & clustering indices
+┃
+┗ 📜 README.md
+
+</pre>
 
 ---
 
 ## 🚀 How It Works
 
-### 1️⃣ Clustering & Indexing (Backend)
-1. Extract MathML/LaTeX from documents.  
-2. Convert to **binary bit-vectors**.  
-3. Apply **MiniBatchKMeans** (Hamming distance) to cluster expressions.  
-4. Save cluster indices to disk (`math_index_storage`).
+### **Clustering & Indexing**
 
-### 2️⃣ Searching
-1. User submits query via `/search` API.  
-2. Query is classified (LaTeX or plain math).  
-3. Converted to bit-vector → matched to nearest cluster(s).  
-4. Return top results from pre-built indices.  
+1. Extract MathML/LaTeX from HTML documents.
+2. Convert to binary bit-vector representation.
+3. Apply MiniBatchKMeans clustering with Hamming distance.
+4. Store cluster indices for fast lookup.
 
----
+### **Searching**
 
-## 📁 Project Structure
-
-### Frontend
-📦frontend
-┣ 📜main.dart # Search UI & routing
-┣ 📜mobile_html_viewer.dart # WebView for Android
-┗ 📜web_html_viewer.dart # iframe renderer for Web
-
-shell
-Copy
-Edit
-
-### Backend
-📦backend
-┣ 📂MIR_model
-┃ ┣ 📜cluster_index.py # Loads & searches cluster index
-┃ ┣ 📜clustering_phase.py # Performs clustering
-┃ ┣ 📜driver_clustering.py # Runs clustering & index creation
-┃ ┣ 📜driver_preprocessing.py # Preprocess HTML → bitvectors + metadata
-┃ ┣ 📜hamming_mini_batch_kmeans.py # MiniBatchKMeans for binary data
-┃ ┣ 📜preprocessing.py # Extract MathML/LaTeX → bitvectors
-┃ ┣ 📜query_processing.py # Detect & convert query type
-┃ ┣ 📜query_to_bitvector.py # LaTeX → MathML → bitvector
-┃ ┗ 📜search_query.py # Executes search
-┣ 📜main.py # FastAPI entry point
-┗ 📁math_index_storage # Stores models & indices
-
-yaml
-Copy
-Edit
+1. User submits query (`LaTeX` or plain text).
+2. Query is processed into a bit-vector.
+3. Nearest clusters are found.
+4. Retrieve and rank top results.
 
 ---
 
-## ⚙️ API Endpoints
+## 🛠 Setup
 
-### `POST /search`
-Search for math expressions.
+### **Frontend**
 
-**Request:**
+```bash
+cd frontend
+flutter run -d chrome   # For Web
+dart pub get            # Install dependencies
+flutter run -d emulator-5554  # For Android
+```
+
+### **Backend**
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+Runs at **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+
+---
+
+## 📡 API Endpoints
+
+### **POST** `/search`
+
 ```json
 {
   "query": "\\frac{a}{b} + c^2"
 }
+```
+
 Response:
 
-json
-Copy
-Edit
+```json
 {
   "time_taken_in_second": 0.25,
   "results": [
@@ -98,92 +118,33 @@ Edit
     { "id": "2", "filename": "doc2.html" }
   ]
 }
-GET /view/{file_id}
-Retrieve HTML content of a result.
-
-Example:
-/view/1 → returns doc1.html
-
-Error:
-404 if file not found.
-
-🛠 Setup Instructions
-Prerequisites
-Flutter SDK
-
-Python 3.8+
-
-Backend running at http://127.0.0.1:8000
-
-Frontend (Flutter)
-Run on Web
-bash
-Copy
-Edit
-flutter run -d chrome
-Run on Android Emulator
-bash
-Copy
-Edit
-flutter run -d emulator-5554
-The app automatically switches between Web and Mobile renderers.
-
-Backend (FastAPI)
-Install dependencies
-bash
-Copy
-Edit
-pip install -r requirements.txt
-Start server
-bash
-Copy
-Edit
-uvicorn main:app --reload
-Server: http://127.0.0.1:8000
-Docs: http://127.0.0.1:8000/docs
-
-🔐 CORS Middleware
-Allows any frontend to connect:
-
-python
-Copy
-Edit
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-In production, replace "*" with your domain.
 ```
-🧪 Development Notes
-HTML returned from backend must contain MathML.
 
-MathJax v3 ensures cross-platform MathML rendering.
+### **GET** `/view/{file_id}`
 
-Large index files (>50MB) are excluded from GitHub (.gitignore).
+Returns HTML content with MathML.
 
-📬 Contact
-Author: Ankit Kumar
-Email: ankit.kumar@aus.ac.in
+---
 
-🚫 License
-This repository is for demonstration only.
-Copyright © 2025 Ankit Kumar. All rights reserved.
+## 📜 License & Usage
 
-You may:
+**Author:** Ankit Kumar
+**Email:** [ankit.kumar@aus.ac.in](mailto:ankit.kumar@aus.ac.in)
 
-✅ View the code and demo.
+This repository is for **demonstration purposes only**.
 
-You may not:
+You **may**:
 
-❌ Copy, clone, or reuse the code.
+* ✅ View the code
+* ✅ Access the demo
 
-❌ Modify or distribute any part.
+You **may not**:
 
-Violations may lead to legal action.
+* ❌ Copy, clone, or reuse the code
+* ❌ Modify or distribute any part of this project
 
-yaml
-Copy
-Edit
+Violations will be prosecuted under copyright law.
+
+---
+
+🎯 **Designed for cross-platform simplicity and full MathML compatibility.**
