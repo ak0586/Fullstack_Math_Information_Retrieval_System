@@ -1,127 +1,96 @@
-# Math Information Retrieval System Frontend (Flutter)
+# 📚 Math Information Retrieval System
 
-A new Flutter project.
+[![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![License](https://img.shields.io/badge/License-Proprietary-red)](#-license)
 
-This is the **Flutter's frontend** for the Math Search Engine project. It allows users to input LaTeX or mathematical expressions, submit search queries, and view HTML+MathML documents. This frontend works seamlessly on **Android APK** and **Web browsers**.
+A **cross-platform Math Search Engine** with a **Flutter frontend** and **FastAPI backend**.  
+It enables users to search mathematical expressions (LaTeX or MathML), retrieve relevant documents, and view them seamlessly on **Android APK** and **Web browsers**.
 
 ---
 
 ## ✨ Features
 
-* 🔍 Search LaTeX or math expressions
-* 📄 Renders HTML with MathML correctly on both Android and Web
-* 💡 Uses `WebView` for Android, and iframe for MathJax on Web
-* ⏱ Shows response time and result count
-* ✅ Clean UI with animation, loading indicators, and error handling
+### Frontend (Flutter)
+- 🔍 Search using LaTeX or plain math expressions  
+- 📄 Render HTML with **MathML** correctly on both Android and Web  
+- 💡 **WebView** for Android, **iframe + MathJax** for Web  
+- ⏱ Display response time and result count  
+- ✅ Clean UI with animations, loading indicators, and error handling  
+
+### Backend (FastAPI)
+- ⚡ Bit-vector encoding for math expressions  
+- 📊 MiniBatchKMeans clustering with Hamming distance  
+- 🚀 High-speed approximate nearest neighbor (ANN) search  
+- 📦 Persistent index storage for instant startup  
 
 ---
 
 ## 🚀 How It Works
 
-1. User types a LaTeX or math query.
-2. Query is converted to JSON-compatible format.
-3. Sent to backend via POST `/search`.
-4. Results are listed. Tapping a result opens a new page:
+### 1️⃣ Clustering & Indexing (Backend)
+1. Extract MathML/LaTeX from documents.  
+2. Convert to **binary bit-vectors**.  
+3. Apply **MiniBatchKMeans** (Hamming distance) to cluster expressions.  
+4. Save cluster indices to disk (`math_index_storage`).
 
-   * **Web**: Opens via `HtmlElementView` (iframe with MathJax rendering)
-   * **Mobile**: Opens using `WebViewController` with MathJax injected
-
----
-
-## 📁 Key Files
-
-* `main.dart` — Main search UI and routing logic
-* `mobile_html_viewer.dart` — Renders HTML using WebView for Android
-* `web_html_viewer.dart` — Renders HTML using iframe for Web
+### 2️⃣ Searching
+1. User submits query via `/search` API.  
+2. Query is classified (LaTeX or plain math).  
+3. Converted to bit-vector → matched to nearest cluster(s).  
+4. Return top results from pre-built indices.  
 
 ---
 
-## 🛠 Setup Instructions
+## 📁 Project Structure
 
-### Prerequisites
+### Frontend
+📦frontend
+┣ 📜main.dart # Search UI & routing
+┣ 📜mobile_html_viewer.dart # WebView for Android
+┗ 📜web_html_viewer.dart # iframe renderer for Web
 
-* Flutter SDK installed
-* Backend running on `http://127.0.0.1:8000` (API must be active)
+shell
+Copy
+Edit
 
-### Run on Web
-
-```bash
-flutter run -d chrome
-```
-
-### Run on Android Emulator
-
-```bash
-flutter run -d emulator-5554
-```
-
-> The app will automatically switch between Web and Mobile renderers.
-
----
-
-# Clustering-Based Mathematical Information Retrieval (MathIR) System Backend
-This project implements a scalable and efficient Mathematical Information Retrieval (MIR) system using clustering techniques. It focuses on the retrieval of mathematical formulae from large-scale datasets by applying bit-vector-based encoding, unsupervised clustering, and fast query processing. The backend uses FastAPI to make scalable. 
-
-🔧 Tech Stack
-
-FastAPI for API framework
-
-Scikit-learn for MiniBatchKMeans clustering
-
-Python standard libraries
-
-CORS middleware for cross-origin frontend-backend communication
-
-📁 Project Structure
-<pre lang="md">
+### Backend
 📦backend
- ┣ 📂MIR_model
- ┃ ┣ 📜cluster_index.py          # Handles cluster index loading and searching
- ┃ ┣ 📜clustering_phase.py       # perfoms clustering on bitvector
- ┃ ┣ 📜driver_clustering.py      # Triggers clustering and index creation
- ┃ ┣ 📜driver_preprocessing.py   # Triggers preprocessing of html document and return dictionary of bitvector and correponding metadata
- ┃ ┣ 📜hamming_mini_batch_kmeans.py   # Adapted minibatch kmeans for binary bitvectors
- ┃ ┣ 📜preprocessing.py          # Perform extraction of mathml and latex from html file and generate bitvectors.
- ┃ ┣ 📜query_processing.py       # first check the query for latex or plaintext, if plain text then generate latex.
- ┃ ┣ 📜query_to_bitvector.py     # convert query latex into mathml then mathml into bitvector bitvector generation.
- ┃ ┣ 📜search_query.py           # take user query and triggers searching
- ┣ 📜main.py                     # FastAPI entry point
- ┗ 📁math_index_storage          # Stores saved cluster models and indices and hamming minibatchkmeans model state
-</pre>
+┣ 📂MIR_model
+┃ ┣ 📜cluster_index.py # Loads & searches cluster index
+┃ ┣ 📜clustering_phase.py # Performs clustering
+┃ ┣ 📜driver_clustering.py # Runs clustering & index creation
+┃ ┣ 📜driver_preprocessing.py # Preprocess HTML → bitvectors + metadata
+┃ ┣ 📜hamming_mini_batch_kmeans.py # MiniBatchKMeans for binary data
+┃ ┣ 📜preprocessing.py # Extract MathML/LaTeX → bitvectors
+┃ ┣ 📜query_processing.py # Detect & convert query type
+┃ ┣ 📜query_to_bitvector.py # LaTeX → MathML → bitvector
+┃ ┗ 📜search_query.py # Executes search
+┣ 📜main.py # FastAPI entry point
+┗ 📁math_index_storage # Stores models & indices
 
-🚀 How It Works
+yaml
+Copy
+Edit
 
-Clustering & Indexing
+---
 
-On first run, mathematical expressions (e.g., LaTeX/MathML) are vectorized to binary format.
+## ⚙️ API Endpoints
 
-MiniBatchKMeans is applied using Hamming distance to cluster expressions.
+### `POST /search`
+Search for math expressions.
 
-Cluster indices are saved to disk.
-
-Searching
-
-User submits a query via the /search endpoint.
-
-The system identifies the nearest cluster(s) and returns top results.
-
-Matching files are returned from the index with minimal latency.
-
-
-⚙️ API Endpoints
-
-POST /search
-
-Search for math expressions based on query.
-
-Request Body (JSON)
-
+**Request:**
+```json
 {
   "query": "\\frac{a}{b} + c^2"
 }
+Response:
 
-Response
-
+json
+Copy
+Edit
 {
   "time_taken_in_second": 0.25,
   "results": [
@@ -129,46 +98,56 @@ Response
     { "id": "2", "filename": "doc2.html" }
   ]
 }
-```bash
-🔸 Returns top 20 matching results using cluster-based approximate nearest neighbor (ANN) search.
-
-Error Response (Invalid Input)
-
-{
-  "detail": "Invalid input: not a recognizable LaTeX or plain mathematical expression."
-}
-
 GET /view/{file_id}
+Retrieve HTML content of a result.
 
-Retrieve HTML content for the result file.
+Example:
+/view/1 → returns doc1.html
 
-Example
+Error:
+404 if file not found.
 
-/view/1 → returns the file (e.g., doc1.html) from main memory if present.
+🛠 Setup Instructions
+Prerequisites
+Flutter SDK
 
-Response
+Python 3.8+
 
-Returns full HTML file as plain content.
+Backend running at http://127.0.0.1:8000
 
-Errors
+Frontend (Flutter)
+Run on Web
+bash
+Copy
+Edit
+flutter run -d chrome
+Run on Android Emulator
+bash
+Copy
+Edit
+flutter run -d emulator-5554
+The app automatically switches between Web and Mobile renderers.
 
-404 if file ID not found or file missing from main memory.
-```
-
-🔄 Startup Behavior
-
-On startup, the backend does the following:
-
-Checks for math_index_storage directory.
-
-If not present, runs clustering_and_indexing() to build clusters.
-
-Else, loads MathClusterIndex from main memory.
+Backend (FastAPI)
+Install dependencies
+bash
+Copy
+Edit
+pip install -r requirements.txt
+Start server
+bash
+Copy
+Edit
+uvicorn main:app --reload
+Server: http://127.0.0.1:8000
+Docs: http://127.0.0.1:8000/docs
 
 🔐 CORS Middleware
+Allows any frontend to connect:
 
-Allows any frontend (web or mobile) to access the backend:
-
+python
+Copy
+Edit
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -176,55 +155,35 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-🔸 In production, replace "*" with your domain (e.g., https://yourapp.com).
-
-🧪 Local Development 
-```bash
-uvicorn main:app --reload
-
-Server runs on http://127.0.0.1:8000
-
-Visit http://127.0.0.1:8000/docs for Swagger UI
+In production, replace "*" with your domain.
 ```
+🧪 Development Notes
+HTML returned from backend must contain MathML.
 
-📦 Deployment Notes
+MathJax v3 ensures cross-platform MathML rendering.
 
-Avoid pushing large index files (>50MB) to GitHub.
+Large index files (>50MB) are excluded from GitHub (.gitignore).
 
-Use .gitignore to exclude math_index_storage.
+📬 Contact
+Author: Ankit Kumar
+Email: ankit.kumar@aus.ac.in
 
-
-
-## 📌 Notes
-
-* HTML returned from backend **must contain MathML**.
-* No external styling or formatting is applied — rendering is kept minimal.
-* MathJax 3 is used for cross-platform MathML support.
-
----
-
-## 📬 Contact
-
-*## ✉ Contact
-
-**Author:** Ankit Kumar
-**Email:** [ankit.kumar@aus.ac.in](mailto:ankit.kumar@aus.ac.in)
-
-
-## 🚫 License and Usage
-
-This repository is intended for **demonstration purposes only**.  
-All source code is **copyright © 2025 Ankit Kumar. All rights reserved.**
+🚫 License
+This repository is for demonstration only.
+Copyright © 2025 Ankit Kumar. All rights reserved.
 
 You may:
-- ✅ View the code and access the demo via provided link.
 
-You may **not**:
-- ❌ Copy, clone, or reuse the code.
-- ❌ Modify or distribute any part of this project.
+✅ View the code and demo.
 
-Violations may result in legal action under copyright law.
+You may not:
 
+❌ Copy, clone, or reuse the code.
 
-🎯 This frontend was designed with cross-platform simplicity and full MathML compatibility in mind.
+❌ Modify or distribute any part.
+
+Violations may lead to legal action.
+
+yaml
+Copy
+Edit
