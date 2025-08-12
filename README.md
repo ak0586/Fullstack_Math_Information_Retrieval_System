@@ -1,4 +1,4 @@
-# ![Math Information Retrieval System Banner](A_2D_digital_graphic_design_banner_for_a_"Math_Inf.png)
+# ![Math Information Retrieval System Banner](A_2D_digital_graphic_design_banner_for_a_"model_banner.png)
 
 # Math Information Retrieval System
 
