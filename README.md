@@ -128,7 +128,7 @@ Returns HTML content with MathML.
 
 ## 📜 License & Usage
 
-**Author:** Ankit Kumar
+**Author:** Ankit Kumar, Chirag Sarda, Rajan Kumar Singh
 **Email:** [ankit.kumar@aus.ac.in](mailto:ankit.kumar@aus.ac.in)
 
 This repository is for **demonstration purposes only**.
