@@ -59,16 +59,24 @@ DELETE /session/{session_id}
 
 Folder Structure
 
-backend/
-├── main.py
-├── MIR_model/
-├── math_index_storage/
-│   ├── clusters/
-│   │   └── indices/
-│   └── state/
-└── requirements.txt
+📂 backend
+┃ ┣ 📂 MIR_model
+┃ ┃ ┣ 📜 cluster_index.py          # Handles cluster index loading and searching
+┃ ┃ ┣ 📜 clustering_phase.py       # Performs clustering on bit-vector data
+┃ ┃ ┣ 📜 driver_clustering.py      # Triggers clustering and index creation
+┃ ┃ ┣ 📜 driver_preprocessing.py   # Preprocesses HTML documents
+┃ ┃ ┣ 📜 hamming_mini_batch_kmeans.py  # MiniBatchKMeans adapted for Hamming distance
+┃ ┃ ┣ 📜 preprocessing.py          # Extracts MathML & LaTeX, generates bit-vectors
+┃ ┃ ┣ 📜 query_processing.py       # Identifies query type and processes
+┃ ┃ ┣ 📜 query_to_bitvector.py     # Converts LaTeX → MathML → bit-vector
+┃ ┃ ┣ 📜 search_query.py           # Main search execution logic
+┃ ┣ 📜 main.py                     # FastAPI entry point
+┃ ┣ 📜 requirements.txt            # contains all required library and modules to be install
+┃ ┗ 📂 math_index_storage          # Stores models & clustering indices
+  └── requirements.txt
 Contributing
 Fork the repo, create a branch, make changes, and submit a pull request.
 
 Ensure API contracts with frontend remain consistent.
+
 
