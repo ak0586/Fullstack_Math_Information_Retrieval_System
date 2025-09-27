@@ -10,7 +10,7 @@ def clustering_and_indexing():
     index = MathClusterIndex(max_clusters=14, base_dir="./math_index_storage")
     
     # Load preprocessed data
-    preprocessed_data=index.load_preprocessed_data("MIR_Model/preprocessed_data.pkl")
+    preprocessed_data=index.load_preprocessed_data("MIR_model/preprocessed_data.pkl")
     unique_bitvectors = index.extract_unique_bitvectors(preprocessed_data)
     print(f"Extracted {len(unique_bitvectors)} unique bitvectors for clustering")
     

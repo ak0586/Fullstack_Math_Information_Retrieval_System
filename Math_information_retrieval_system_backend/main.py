@@ -1,3 +1,5 @@
+#MIR backend API can handle multiple users concurrently.
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from MIR_model.search_query import query_search  
@@ -10,9 +12,15 @@ import re
 import os
 import uuid
 import asyncio
-from typing import Dict, Any
+from typing import Dict
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 
+
+# ----------------- Logging -----------------
+logger = logging.getLogger("uvicorn.error")
+
+# ----------------- Models -----------------
 class user_query(BaseModel):
     query: str
 
@@ -36,18 +44,73 @@ def cleanup_expired_sessions():
         if current_time - session.timestamp > SESSION_TIMEOUT
     ]
     for session_id in expired_sessions:
+        logger.info(f"Cleaning up expired session {session_id}")
         del user_sessions[session_id]
+
+async def session_cleanup_task():
+    """Background task to periodically cleanup expired sessions"""
+    while True:
+        cleanup_expired_sessions()
+        await asyncio.sleep(600)  # every 10 minutes
+
+
+def is_index_storage_valid(index_storage_path: str) -> bool:
+    """
+    Check if the index storage is valid and contains necessary data
+    """
+    if not os.path.exists(index_storage_path):
+        logger.info("Index storage directory does not exist")
+        return False
+    
+    # Check for required subdirectories
+    required_dirs = ['clusters', 'state','clusters/indices']
+    for dir_name in required_dirs:
+        dir_path = os.path.join(index_storage_path, dir_name)
+        if not os.path.exists(dir_path):
+            logger.info(f"Missing required directory: {dir_path}")
+            return False
+        
+        # Method 1: Using os.listdir() - checks if directory has any files/folders
+        try:
+            if not os.listdir(dir_path):
+                logger.info(f"Required directory is empty: {dir_path}")
+                return False
+        except PermissionError:
+            logger.error(f"Permission denied accessing directory: {dir_path}")
+            return False
+        except OSError as e:
+            logger.error(f"Error accessing directory {dir_path}: {e}")
+            return False
+    return True
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # print("🔥 Lifespan hook is running")
+
     global clusterer
+    
     index_storage = 'math_index_storage'
-    if not os.path.exists(index_storage):
+    
+    # Check if index storage is valid and complete
+    if not is_index_storage_valid(index_storage):
+        logger.info("Index storage is invalid, missing, or incomplete. Creating new clustering index...")
         clusterer = clustering_and_indexing()
     else:
-        clusterer = MathClusterIndex()
+        logger.info("Loading existing clustering index...")
+        try:
+            clusterer = MathClusterIndex()
+            # Optionally, you can add a validation step here to ensure the loaded index works
+            # If loading fails, fall back to recreating the index
+        except Exception as e:
+            logger.error(f"Failed to load existing index: {e}")
+            logger.info("Falling back to creating new clustering index...")
+            clusterer = clustering_and_indexing()
+    
+    # Start background cleanup task
+    asyncio.create_task(session_cleanup_task())
     yield
-
+    print("👋 Lifespan hook shutting down")
+    
 app = FastAPI(lifespan=lifespan)   
 
 app.add_middleware(
@@ -60,7 +123,7 @@ app.add_middleware(
 
 @app.post('/search')
 async def query(query_data: user_query):
-    global clusterer
+    # global clusterer
     
     # Clean up expired sessions periodically
     cleanup_expired_sessions()

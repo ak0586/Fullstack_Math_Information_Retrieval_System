@@ -8,6 +8,8 @@ from typing import List,Dict
 import os
 from datetime import datetime
 from collections import defaultdict
+
+
 # Processed batch 1 with 1000 bitvectors
 def rapidfuzz_similarity(str1, str2):
     if str1==str2:
@@ -187,7 +189,7 @@ class MathClusterIndex:
                 return
             
                 
-            # Initialize SerialMiniBatchKMeans only once on first batch
+            # Initialize HammingMiniBatchKMeans only once on first batch
             if not self.centroids_initialized:
                 print(f"Initializing centroids with batch {batch_num}")
                 self.kmeans = HammingMiniBatchKMeans(
@@ -317,7 +319,8 @@ class MathClusterIndex:
         except Exception as e:
             print(f"Error loading clusters into memory: {str(e)}")
             raise
-                
+
+    '''            
     def search(self, query_bitvector: str, query_latex: str = None, k: int = None) -> List[Dict]:
         """
         Search for similar expressions using KMeans prediction with neighbor cluster fallback
@@ -458,5 +461,183 @@ class MathClusterIndex:
             return self._full_search(query_bitvector, query_latex)
             
         return results
+
+    '''
+    def search(self, query_bitvector: str, query_latex: str = None, k: int = None) -> List[Dict]:
+        """
+        Search for similar expressions using KMeans prediction with neighbor cluster fallback
+        
+        Args:
+            query_bitvector: Bitvector string to search for
+            query_latex: Optional LaTeX string for similarity refinement
+            k: Optional number of results to return
+            
+        Returns:
+            List of matching results sorted by similarity (one result per document)
+        """
+        if not self.kmeans:
+            print("ERROR: Model not fitted or KMeans model not loaded.")
+            print("Please ensure the model has been trained or that a trained model was properly loaded.")
+            return []
+            
+        if not self.training_completed:
+            print("Warning: Searching before training is completed may give inconsistent results")
+            
+        results = []
+        
+        try:
+            print("--------------Using Binary Minibatch KMeans prediction---------------")
+            
+            # Convert bitvector to feature vector and predict cluster
+            query_vector = self.bitvector_to_array(query_bitvector).reshape(1, -1)
+            
+            # Predict the cluster
+            predicted_cluster = self.kmeans.predict(query_vector)[0]
+            cluster_key = f"C{predicted_cluster}"
+            print(f"Searching in predicted cluster: {cluster_key}")
+            
+            # Search in the predicted cluster from cache
+            if cluster_key in self.cluster_cache:
+                # Check if exact bitvector exists in predicted cluster
+                if query_bitvector in self.cluster_cache[cluster_key]:
+                    matches = self.cluster_cache[cluster_key][query_bitvector]
+                    results = self._process_matches(matches, query_bitvector, query_latex, cluster_key)
+                else:
+                    print(f"Bitvector not found in predicted cluster {cluster_key}")
+                    # Search in neighboring clusters instead of full search
+                    print("Searching in neighboring clusters...")
+                    neighbor_results = self._search_neighboring_clusters(query_bitvector, query_latex, predicted_cluster)
+                    results.extend(neighbor_results)
+            else:
+                print(f"Predicted cluster {cluster_key} not found in cache")
+                print("Falling back to full search...")
+                return self._search_neighboring_clusters(query_bitvector, query_latex, predicted_cluster)
+                
+        except Exception as e:
+            print(f"Error during search: {str(e)}")
+            print("Traceback:", end="")
+            import traceback
+            traceback.print_exc()
+            # Fallback to full search on error
+            print("Falling back to full search due to error...")
+            return self._search_neighboring_clusters(query_bitvector, query_latex, predicted_cluster)
+
+        # Deduplicate by filepath and sort results by similarity score
+        final_results = self._deduplicate_and_rank_results(results)
+        return final_results if k is None else final_results[:k]
+
+    def _process_matches(self, matches: List[Dict], query_bitvector: str, query_latex: str, cluster_key: str) -> List[Dict]:
+        """
+        Process matches and calculate similarity scores
+        
+        Args:
+            matches: List of matched documents
+            query_bitvector: The query bitvector
+            query_latex: The query LaTeX string
+            cluster_key: The cluster identifier
+            
+        Returns:
+            List of processed results
+        """
+        results = []
+        
+        for match in matches:
+            latex_score = 0.0
+            if query_latex and match.get('latex'):
+                latex_score = rapidfuzz_similarity(query_latex, match['latex'])
+            
+            result = {
+                'filepath': match['filepath'],
+                'latex': match['latex'],
+                'bitvector': query_bitvector,
+                'cluster': cluster_key,
+                'similarity': latex_score,
+                'query_latex': query_latex
+            }
+            results.append(result)
+        
+        return results
+
+    def _deduplicate_and_rank_results(self, results: List[Dict]) -> List[Dict]:
+        """
+        Remove duplicate documents and keep only the best match per document
+        
+        Args:
+            results: List of all results (may contain duplicates)
+            
+        Returns:
+            List of deduplicated results ranked by similarity
+        """
+        # Group results by filepath
+        filepath_groups = {}
+        
+        for result in results:
+            filepath = result['filepath']
+            if filepath not in filepath_groups:
+                filepath_groups[filepath] = []
+            filepath_groups[filepath].append(result)
+        
+        # For each filepath, keep only the result with highest similarity
+        deduplicated_results = []
+        
+        for filepath, group in filepath_groups.items():
+            # Sort group by similarity (highest first) and take the best one
+            best_result = max(group, key=lambda x: x['similarity'])
+            deduplicated_results.append(best_result)
+        
+        # Sort final results by similarity score (highest first)
+        deduplicated_results.sort(key=lambda x: x['similarity'], reverse=True)
+        
+        return deduplicated_results
+
+    def _search_neighboring_clusters(self, query_bitvector: str, query_latex: str = None, predicted_cluster: int = 1) -> List[Dict]:
+        """
+        Search for the bitvector in neighboring clusters
+        
+        Args:
+            query_bitvector: Bitvector string to search for
+            query_latex: Optional LaTeX string for similarity refinement
+            predicted_cluster: The original predicted cluster ID
+            
+        Returns:
+            List of matching results from neighboring clusters (deduplicated)
+        """
+        results = []
+        
+        # Calculate distances from query vector to all cluster centroids
+        query_vector = self.bitvector_to_array(query_bitvector).reshape(1, -1)
+    
+        # Calculate distances to all centroids
+        distances = []
+        for i in range(self.kmeans.n_clusters):
+            centroid = self.kmeans.cluster_centers_[i].reshape(1, -1)
+            distance = np.linalg.norm(query_vector - centroid)
+            distances.append((i, distance))
+        
+        # Sort clusters by distance (closest first)
+        distances.sort(key=lambda x: x[1])
+        
+        # Skip the first one as it's the original predicted cluster
+        # Take the next 3 closest clusters (or fewer if there aren't 3)
+        neighbor_clusters = [d[0] for d in distances[1:min(4, len(distances))]]
+        
+        print(f"Checking {len(neighbor_clusters)} neighboring clusters: {neighbor_clusters}")
+        
+        # Search in each neighboring cluster
+        for neighbor_id in neighbor_clusters:
+            neighbor_key = f"C{neighbor_id}"
+            
+            if neighbor_key in self.cluster_cache and query_bitvector in self.cluster_cache[neighbor_key]:
+                print(f"Found match in neighboring cluster {neighbor_key}")
+                matches = self.cluster_cache[neighbor_key][query_bitvector]
+                cluster_results = self._process_matches(matches, query_bitvector, query_latex, neighbor_key)
+                results.extend(cluster_results)
+        
+        if not results:
+            print("No matches found in neighboring clusters, falling back to full search")
+            return self._full_search(query_bitvector, query_latex)
+        
+        # Deduplicate and rank before returning
+        return self._deduplicate_and_rank_results(results)
 
 

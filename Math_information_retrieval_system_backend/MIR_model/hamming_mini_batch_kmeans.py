@@ -13,7 +13,6 @@ class HammingMiniBatchKMeans:
         self.verbose = verbose
         self.cluster_centers_ = None
         self.labels_ = None
-        self.total_similarity_ = None
         self.n_iter_ = 0
 
     def _hamming_distance(self, X, centroids):
@@ -80,7 +79,7 @@ class HammingMiniBatchKMeans:
         
         # Compute distances and assign samples to closest centroid
         distances = self._hamming_distance(X, self.cluster_centers_)
-        labels = np.argmax(distances, axis=1)  # Use argmax since we want maximum similarity
+        labels = np.argmin(distances, axis=1)  # Use argmax since we want maximum similarity
         
         # Update centroids based on this batch
         self._update_centroids(X, labels)
@@ -123,7 +122,6 @@ class HammingMiniBatchKMeans:
         # Calculate final inertia (negative sum of inverse Hamming distances)
         distances = self._hamming_distance(X, self.cluster_centers_)
         self.labels_=np.argmin(distances,axis=1)
-        self.total_similarity_ = np.sum(np.max(distances, axis=1))
         # self.print_centroids()
         
         return self
