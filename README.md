@@ -10,6 +10,55 @@ It supports **LaTeX/MathML search**, **cross-platform rendering**, and **fast re
 
 ## 📌 Features
 
+
+
+### Frontend (Flutter)
+
+* 🔍 Search LaTeX or math expressions
+* 📄 Render HTML with MathML on Android and Web
+* 💡 WebView for Android, iframe + MathJax for Web
+* ⏱ Show response time and result count
+* ✅ Clean UI with animation, loading indicators, and error handling
+
+### Backend (FastAPI)
+
+* ⚡ Cluster-based approximate nearest neighbor (ANN) search
+* 🔢 MiniBatchKMeans with Hamming distance for binary bit-vectors
+* 📂 Preprocessing of HTML to extract MathML & LaTeX
+* 🚀 Scalable and optimized for large datasets
+
+---
+
+## 📁 Directory Structure
+
+<pre lang="md">
+📦 math-ir-system
+┣ 📂 frontend
+┃ ┣ 📜 main.dart                  # Main search UI and routing logic
+┃ ┣ 📜 mobile_html_viewer.dart    # WebView-based HTML renderer for Android
+┃ ┣ 📜 web_html_viewer.dart       # iframe-based HTML renderer for Web
+┃ ┗ 📜 pubspec.yaml               # Flutter dependencies
+┃
+┣ 📂 backend
+┃ ┣ 📂 MIR_model
+┃ ┃ ┣ 📜 cluster_index.py          # Handles cluster index loading and searching
+┃ ┃ ┣ 📜 clustering_phase.py       # Performs clustering on bit-vector data
+┃ ┃ ┣ 📜 driver_clustering.py      # Triggers clustering and index creation
+┃ ┃ ┣ 📜 driver_preprocessing.py   # Preprocesses HTML documents
+┃ ┃ ┣ 📜 hamming_mini_batch_kmeans.py  # MiniBatchKMeans adapted for Hamming distance
+┃ ┃ ┣ 📜 preprocessing.py          # Extracts MathML & LaTeX, generates bit-vectors
+┃ ┃ ┣ 📜 query_processing.py       # Identifies query type and processes
+┃ ┃ ┣ 📜 query_to_bitvector.py     # Converts LaTeX → MathML → bit-vector
+┃ ┃ ┣ 📜 search_query.py           # Main search execution logic
+┃ ┣ 📜 main.py                     # FastAPI entry point
+┃ ┣ 📜 requirements.txt            # contains all required library and modules to be install
+┃ ┗ 📂 math_index_storage          # Stores models & clustering indices
+┗ 📜 README.md
+
+</pre>
+
+---
+
 ## Query Set
 # If you want to directly copy the latex from the json file then please replace the '//' with '/' and '////' with '//' for perform searching on the UI. but queries given are already UI compatible no need make changes.
 # Mathematical Queries that are provided by NTCIR-12: **[http://ntcir-math.nii.ac.jp/](http://ntcir-math.nii.ac.jp/)**
@@ -253,52 +302,7 @@ r_{xy} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{(n-1) s_x s_y} = \
 r_{xy} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{(n-1) s_x s_y} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n} (x_i - \bar{x})^2 \sum_{i=1}^{n} (y_i - \bar{y})^2}}
 ```
 
-### Frontend (Flutter)
 
-* 🔍 Search LaTeX or math expressions
-* 📄 Render HTML with MathML on Android and Web
-* 💡 WebView for Android, iframe + MathJax for Web
-* ⏱ Show response time and result count
-* ✅ Clean UI with animation, loading indicators, and error handling
-
-### Backend (FastAPI)
-
-* ⚡ Cluster-based approximate nearest neighbor (ANN) search
-* 🔢 MiniBatchKMeans with Hamming distance for binary bit-vectors
-* 📂 Preprocessing of HTML to extract MathML & LaTeX
-* 🚀 Scalable and optimized for large datasets
-
----
-
-## 📁 Directory Structure
-
-<pre lang="md">
-📦 math-ir-system
-┣ 📂 frontend
-┃ ┣ 📜 main.dart                  # Main search UI and routing logic
-┃ ┣ 📜 mobile_html_viewer.dart    # WebView-based HTML renderer for Android
-┃ ┣ 📜 web_html_viewer.dart       # iframe-based HTML renderer for Web
-┃ ┗ 📜 pubspec.yaml               # Flutter dependencies
-┃
-┣ 📂 backend
-┃ ┣ 📂 MIR_model
-┃ ┃ ┣ 📜 cluster_index.py          # Handles cluster index loading and searching
-┃ ┃ ┣ 📜 clustering_phase.py       # Performs clustering on bit-vector data
-┃ ┃ ┣ 📜 driver_clustering.py      # Triggers clustering and index creation
-┃ ┃ ┣ 📜 driver_preprocessing.py   # Preprocesses HTML documents
-┃ ┃ ┣ 📜 hamming_mini_batch_kmeans.py  # MiniBatchKMeans adapted for Hamming distance
-┃ ┃ ┣ 📜 preprocessing.py          # Extracts MathML & LaTeX, generates bit-vectors
-┃ ┃ ┣ 📜 query_processing.py       # Identifies query type and processes
-┃ ┃ ┣ 📜 query_to_bitvector.py     # Converts LaTeX → MathML → bit-vector
-┃ ┃ ┣ 📜 search_query.py           # Main search execution logic
-┃ ┣ 📜 main.py                     # FastAPI entry point
-┃ ┣ 📜 requirements.txt            # contains all required library and modules to be install
-┃ ┗ 📂 math_index_storage          # Stores models & clustering indices
-┗ 📜 README.md
-
-</pre>
-
----
 
 ## 🚀 How It Works
 
