@@ -292,8 +292,8 @@ r_{xy} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{(n-1) s_x s_y} = \
 ┃ ┃ ┣ 📜 query_to_bitvector.py     # Converts LaTeX → MathML → bit-vector
 ┃ ┃ ┣ 📜 search_query.py           # Main search execution logic
 ┃ ┣ 📜 main.py                     # FastAPI entry point
+┃ ┣ 📜 requirements.txt            # contains all required library and modules to be install
 ┃ ┗ 📂 math_index_storage          # Stores models & clustering indices
-┃
 ┗ 📜 README.md
 
 </pre>
@@ -354,7 +354,7 @@ Runs at **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
 Response:
 
 ```json
-{
+{ "session_id" : "6bcf8ceb-0a51-416b-b52c-78eac5c955c9",
   "time_taken_in_second": 0.25,
   "results": [
     { "id": "1", "filename": "doc1.html" },
@@ -363,7 +363,7 @@ Response:
 }
 ```
 
-### **GET** `/view/{file_id}`
+### **GET** `/view/6bcf8ceb-0a51-416b-b52c-78eac5c955c9/2' `
 
 Returns HTML content with MathML.
 
@@ -372,7 +372,7 @@ Returns HTML content with MathML.
 ## 📜 License & Usage
 
 **Author:** Ankit Kumar, Chirag Sarda, Rajan Kumar Singh
-**Email:** [ankit.kumar@aus.ac.in](mailto:ankit.kumar@aus.ac.in)
+**Email:** [ankit.kumar@aus.ac.in](mailto:ankit.kumar@aus.ac.in), [chiragsarda12@gmail.com](chiragsarda12@gmail.com)
 
 This repository is for **demonstration purposes only**.
 
