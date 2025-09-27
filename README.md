@@ -25,7 +25,9 @@ It supports **LaTeX/MathML search**, **cross-platform rendering**, and **fast re
 
 
 **Rendered:**  
-$-0.026838601\ldots$
+```math
+-0.026838601\ldots
+```
 
 ---
 
@@ -35,7 +37,9 @@ $-0.026838601\ldots$
 
 
 **Rendered:**  
-$\mathfrak{P}$
+```math
+\mathfrak{P}
+```
 
 ---
 
@@ -45,8 +49,9 @@ N = \left\lfloor 0.5 - \log_{2} \left(\frac{\text{Frequency of this item}}{\text
 
 
 **Rendered:**  
-$N = \left\lfloor 0.5 - \log_{2} \left(\frac{\text{Frequency of this item}}{\text{Frequency of most common item}}\right) \right\rfloor$
-
+```math
+N = \left\lfloor 0.5 - \log_{2} \left(\frac{\text{Frequency of this item}}{\text{Frequency of most common item}}\right) \right\rfloor
+```
 ---
 
 ### 4
@@ -54,8 +59,9 @@ $N = \left\lfloor 0.5 - \log_{2} \left(\frac{\text{Frequency of this item}}{\tex
 \nabla \times \mathbf{B} = \mu_{0} \mathbf{J} +\underbrace{\mu_{0}\epsilon_{0} \frac{\partial}{\partial t}\mathbf{E}}_{\text{Maxwell's term}}
 
 **Rendered:**  
-$\nabla \times \mathbf{B} = \mu_{0} \mathbf{J} +\underbrace{\mu_{0}\epsilon_{0} \frac{\partial}{\partial t}\mathbf{E}}_{\text{Maxwell's term}}$
-
+```math
+\nabla \times \mathbf{B} = \mu_{0} \mathbf{J} +\underbrace{\mu_{0}\epsilon_{0} \frac{\partial}{\partial t}\mathbf{E}}_{\text{Maxwell's term}}
+```
 ---
 
 ### 5
@@ -64,8 +70,9 @@ $\nabla \times \mathbf{B} = \mu_{0} \mathbf{J} +\underbrace{\mu_{0}\epsilon_{0} 
 
 
 **Rendered:**  
-$1 + \cfrac{1}{2 + \cfrac{1}{5 + \cfrac{1}{5 + \cfrac{1}{4 + \ddots}}}}$
-
+```math
+1 + \cfrac{1}{2 + \cfrac{1}{5 + \cfrac{1}{5 + \cfrac{1}{4 + \ddots}}}}
+```
 ---
 
 ### 6
@@ -75,7 +82,7 @@ $1 + \cfrac{1}{2 + \cfrac{1}{5 + \cfrac{1}{5 + \cfrac{1}{4 + \ddots}}}}$
 
 **Rendered:**  
 ```math
-$^{238}_{92}\mathrm{U} + ^{64}_{28}\mathrm{Ni} \;\rightarrow\;^{302}_{120}\mathrm{Ubn}^{*} \;\rightarrow\; \textit{fission only}$
+^{238}_{92}\mathrm{U} + ^{64}_{28}\mathrm{Ni} \;\rightarrow\;^{302}_{120}\mathrm{Ubn}^{*} \;\rightarrow\; \textit{fission only}
 ```
 ---
 
@@ -85,7 +92,9 @@ $^{238}_{92}\mathrm{U} + ^{64}_{28}\mathrm{Ni} \;\rightarrow\;^{302}_{120}\mathr
 
 
 **Rendered:**  
-$0 \rightarrow G^\wedge \xrightarrow{\pi^\wedge} X^\wedge \xrightarrow{i^\wedge} H^\wedge \rightarrow 0$
+```math
+0 \rightarrow G^\wedge \xrightarrow{\pi^\wedge} X^\wedge \xrightarrow{i^\wedge} H^\wedge \rightarrow 0
+```
 
 ---
 
@@ -96,7 +105,7 @@ w = \begin{cases} w^* & \text{if } w^* > \frac{1}{2}, \ \frac{1}{2} & \text{if }
 
 **Rendered:** 
 ```math
-$w = \begin{cases} w^* & \text{if } w^* > \frac{1}{2}, \\ \frac{1}{2} & \text{if } w^* \le \frac{1}{2}. \end{cases}$
+w = \begin{cases} w^* & \text{if } w^* > \frac{1}{2}, \\ \frac{1}{2} & \text{if } w^* \le \frac{1}{2}. \end{cases}
 ```
 ---
 
@@ -107,7 +116,7 @@ $w = \begin{cases} w^* & \text{if } w^* > \frac{1}{2}, \\ \frac{1}{2} & \text{if
 
 **Rendered:**  
 ```math
-$\begin{bmatrix} V_1 \\ I_2 \end{bmatrix} = \begin{bmatrix} h_{11} & h_{12} \\ h_{21} & h_{22} \end{bmatrix} \begin{bmatrix} I_1 \\ V_2 \end{bmatrix}$
+\begin{bmatrix} V_1 \\ I_2 \end{bmatrix} = \begin{bmatrix} h_{11} & h_{12} \\ h_{21} & h_{22} \end{bmatrix} \begin{bmatrix} I_1 \\ V_2 \end{bmatrix}
 ```
 ---
 
@@ -117,7 +126,9 @@ L(\lambda, \alpha, s) = \sum_{n=0}^{\infty} \frac{\exp(2\pi i\lambda n)}{(n+\alp
 
 
 **Rendered:**  
-$L(\lambda, \alpha, s) = \sum_{n=0}^{\infty} \frac{\exp(2\pi i\lambda n)}{(n+\alpha)^s}.$
+```math
+L(\lambda, \alpha, s) = \sum_{n=0}^{\infty} \frac{\exp(2\pi i\lambda n)}{(n+\alpha)^s}.
+```
 
 ---
 
@@ -127,7 +138,9 @@ ax^{2} + bx + c = 0
 
 
 **Rendered:**  
-$ax^{2} + bx + c = 0$
+```math
+ax^{2} + bx + c = 0
+```
 
 ---
 
@@ -136,8 +149,10 @@ $ax^{2} + bx + c = 0$
 O(mn \log m)
 
 
-**Rendered:**  
-$O(mn \log m)$
+**Rendered:**
+```math
+O(mn \log m)
+```
 
 ---
 
@@ -146,8 +161,10 @@ $O(mn \log m)$
 A \oplus B = (A^c \ominus B^s)^c
 
 
-**Rendered:**  
-$A \oplus B = (A^c \ominus B^s)^c$
+**Rendered:** 
+```math
+A \oplus B = (A^c \ominus B^s)^c
+```
 
 ---
 
@@ -157,7 +174,9 @@ $A \oplus B = (A^c \ominus B^s)^c$
 
 
 **Rendered:**  
-$\cos \alpha = -\cos \beta \cos \gamma + \sin \beta \sin \gamma \cosh \frac{a}{k}$
+```math
+\cos \alpha = -\cos \beta \cos \gamma + \sin \beta \sin \gamma \cosh \frac{a}{k}
+```
 
 ---
 
@@ -167,7 +186,9 @@ $\cos \alpha = -\cos \beta \cos \gamma + \sin \beta \sin \gamma \cosh \frac{a}{k
 
 
 **Rendered:**  
-$\forall x, y \in A \ [x \neq y \rightarrow \neg \exists z \in X \ [z \leq x \wedge z \leq y]]$
+```math
+\forall x, y \in A \ [x \neq y \rightarrow \neg \exists z \in X \ [z \leq x \wedge z \leq y]]
+```
 
 ---
 
@@ -177,7 +198,9 @@ $\forall x, y \in A \ [x \neq y \rightarrow \neg \exists z \in X \ [z \leq x \we
 
 
 **Rendered:**  
-$\tau_{\text{rms}} = \sqrt{\frac{\int_{0}^{\infty} (\tau - \bar{\tau})^{2} A_c(\tau)\, d\tau}{\int_{0}^{\infty} A_c(\tau)\, d\tau}}$
+```math
+\tau_{\text{rms}} = \sqrt{\frac{\int_{0}^{\infty} (\tau - \bar{\tau})^{2} A_c(\tau)\, d\tau}{\int_{0}^{\infty} A_c(\tau)\, d\tau}}
+```
 
 ---
 
@@ -187,7 +210,9 @@ x - 1 - \frac{1}{2} - \frac{1}{4} - \frac{1}{5} - \frac{1}{6} - \frac{1}{9} - \c
 
 
 **Rendered:**  
-$x - 1 - \frac{1}{2} - \frac{1}{4} - \frac{1}{5} - \frac{1}{6} - \frac{1}{9} - \cdots = 1$
+```math
+x - 1 - \frac{1}{2} - \frac{1}{4} - \frac{1}{5} - \frac{1}{6} - \frac{1}{9} - \cdots = 1
+```
 
 ---
 
@@ -224,8 +249,9 @@ r_{xy} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{(n-1) s_x s_y} = \
 
 
 **Rendered:**  
-$r_{xy} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{(n-1) s_x s_y} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n} (x_i - \bar{x})^2 \sum_{i=1}^{n} (y_i - \bar{y})^2}}$
-
+```math
+r_{xy} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{(n-1) s_x s_y} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n} (x_i - \bar{x})^2 \sum_{i=1}^{n} (y_i - \bar{y})^2}}
+```
 
 ### Frontend (Flutter)
 
