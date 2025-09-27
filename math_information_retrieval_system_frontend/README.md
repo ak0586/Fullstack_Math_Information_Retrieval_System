@@ -1,9 +1,5 @@
 # math_information_retrieval_system_frontend
 
-A new Flutter project.
-
-## Getting Started
-
 
 # MIR System - Frontend
 
@@ -77,13 +73,10 @@ git clone https://github.com/yourusername/mir-system.git
 cd mir-system/frontend
 Install dependencies (for Flutter Web/Mobile):
 
-bash
-Copy code
+
 flutter pub get
 Run locally:
 
-bash
-Copy code
 flutter run -d chrome       # Web
 flutter run -d android      # Android
 flutter run -d ios          # iOS
@@ -91,8 +84,6 @@ Connect to backend API:
 
 Ensure the frontend API endpoint points to your backend URL, e.g.:
 
-dart
-Copy code
 const API_URL = "http://127.0.0.1:8000";
 Usage
 Open the frontend in the browser or mobile emulator.
@@ -101,13 +92,11 @@ Enter a mathematical expression in LaTeX/MathML.
 
 Click Search to retrieve results.
 
-Results display the query, retrieved expression, and relevance rating.
+Displays the result's document name , Enter the particular document then you will see the rendered webpage.
 
 Loading and error states are handled with feedback and retry buttons.
 
 Folder Structure
-bash
-Copy code
 frontend/
 ├── lib/
 │   ├── web_html_viewer.dart      # Web-specific HTML viewer
