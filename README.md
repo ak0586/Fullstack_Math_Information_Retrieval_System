@@ -12,7 +12,7 @@ It supports **LaTeX/MathML search**, **cross-platform rendering**, and **fast re
 
 ## Query Set
 # If you want to directly copy the latex from the json file then please replace the '//' with '/' and '////' with '//' for perform searching on the UI. but queries given are already UI compatible no need make changes.
-# Mathematical Queries that are provided by NTCIR-12
+# Mathematical Queries that are provided by NTCIR-12: **[http://ntcir-math.nii.ac.jp/](http://ntcir-math.nii.ac.jp/)**
 
 1. **Raw LaTeX** — shows the exact LaTeX code.
 2. **Rendered** — shows how it will appear on GitHub.
@@ -74,8 +74,9 @@ $1 + \cfrac{1}{2 + \cfrac{1}{5 + \cfrac{1}{5 + \cfrac{1}{4 + \ddots}}}}$
 
 
 **Rendered:**  
+```math
 $^{238}_{92}\mathrm{U} + ^{64}_{28}\mathrm{Ni} \;\rightarrow\;^{302}_{120}\mathrm{Ubn}^{*} \;\rightarrow\; \textit{fission only}$
-
+```
 ---
 
 ### 7
@@ -93,9 +94,10 @@ $0 \rightarrow G^\wedge \xrightarrow{\pi^\wedge} X^\wedge \xrightarrow{i^\wedge}
 w = \begin{cases} w^* & \text{if } w^* > \frac{1}{2}, \ \frac{1}{2} & \text{if } w^* \le \frac{1}{2}. \end{cases}
 
 
-**Rendered:**  
+**Rendered:** 
+```math
 $w = \begin{cases} w^* & \text{if } w^* > \frac{1}{2}, \\ \frac{1}{2} & \text{if } w^* \le \frac{1}{2}. \end{cases}$
-
+```
 ---
 
 ### 9
@@ -104,8 +106,9 @@ $w = \begin{cases} w^* & \text{if } w^* > \frac{1}{2}, \\ \frac{1}{2} & \text{if
 
 
 **Rendered:**  
+```math
 $\begin{bmatrix} V_1 \\ I_2 \end{bmatrix} = \begin{bmatrix} h_{11} & h_{12} \\ h_{21} & h_{22} \end{bmatrix} \begin{bmatrix} I_1 \\ V_2 \end{bmatrix}$
-
+```
 ---
 
 ### 10
@@ -194,9 +197,10 @@ P(x_{i}) = \frac{N!}{n_{x}!(N-n_{x})!} p^{n_{x}}{x} (1-p{x})^{N-n_{x}}
 
 
 
-**Rendered:**  
-$P(x_{i}) = \frac{N!}{n_{x}!(N-n_{x})!} p^{n_{x}}_{x} (1-p_{x})^{N-n_{x}}$
-
+**Rendered:** 
+```math
+P(x_{i}) = \frac{N!}{n_{x}!(N-n_{x})!} p^{n_{x}}_{x} (1-p_{x})^{N-n_{x}}
+```
 ---
 
 ### 19
@@ -205,12 +209,13 @@ H_{ij} = \begin{bmatrix} \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial x_{j}}
 
 
 **Rendered:**  
-$H_{ij} = \begin{bmatrix} 
+```math
+H_{ij} = \begin{bmatrix} 
 \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial z_{j}} \\ 
 \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial z_{j}} \\ 
 \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial z_{j}} 
-\end{bmatrix}$
-
+\end{bmatrix}
+```
 ---
 
 ### 20
