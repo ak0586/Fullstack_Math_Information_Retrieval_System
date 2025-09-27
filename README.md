@@ -11,10 +11,8 @@ It supports **LaTeX/MathML search**, **cross-platform rendering**, and **fast re
 ## 📌 Features
 
 ## Query Set
-
-# Mathematical Queries
-
-This README shows a set of mathematical queries in two ways:
+# If you want to directly copy the latex from the json file then please replace the '//' with '/' and '////' with '//' for perform searching on the UI. but queries given are already UI compatible no need make changes.
+# Mathematical Queries that are provided by NTCIR-12
 
 1. **Raw LaTeX** — shows the exact LaTeX code.
 2. **Rendered** — shows how it will appear on GitHub.
@@ -25,8 +23,6 @@ This README shows a set of mathematical queries in two ways:
 **Raw LaTeX:**  
 -0.026838601\ldots
 
-yaml
-Copy code
 
 **Rendered:**  
 $-0.026838601\ldots$
@@ -37,8 +33,6 @@ $-0.026838601\ldots$
 **Raw LaTeX:**  
 \mathfrak{P}
 
-yaml
-Copy code
 
 **Rendered:**  
 $\mathfrak{P}$
@@ -49,8 +43,6 @@ $\mathfrak{P}$
 **Raw LaTeX:**  
 N = \left\lfloor 0.5 - \log_{2} \left(\frac{\text{Frequency of this item}}{\text{Frequency of most common item}}\right) \right\rfloor
 
-yaml
-Copy code
 
 **Rendered:**  
 $N = \left\lfloor 0.5 - \log_{2} \left(\frac{\text{Frequency of this item}}{\text{Frequency of most common item}}\right) \right\rfloor$
@@ -61,9 +53,6 @@ $N = \left\lfloor 0.5 - \log_{2} \left(\frac{\text{Frequency of this item}}{\tex
 **Raw LaTeX:**  
 \nabla \times \mathbf{B} = \mu_{0} \mathbf{J} +\underbrace{\mu_{0}\epsilon_{0} \frac{\partial}{\partial t}\mathbf{E}}_{\text{Maxwell's term}}
 
-yaml
-Copy code
-
 **Rendered:**  
 $\nabla \times \mathbf{B} = \mu_{0} \mathbf{J} +\underbrace{\mu_{0}\epsilon_{0} \frac{\partial}{\partial t}\mathbf{E}}_{\text{Maxwell's term}}$
 
@@ -73,8 +62,6 @@ $\nabla \times \mathbf{B} = \mu_{0} \mathbf{J} +\underbrace{\mu_{0}\epsilon_{0} 
 **Raw LaTeX:**  
 1 + \cfrac{1}{2 + \cfrac{1}{5 + \cfrac{1}{5 + \cfrac{1}{4 + \ddots}}}}
 
-yaml
-Copy code
 
 **Rendered:**  
 $1 + \cfrac{1}{2 + \cfrac{1}{5 + \cfrac{1}{5 + \cfrac{1}{4 + \ddots}}}}$
@@ -85,8 +72,6 @@ $1 + \cfrac{1}{2 + \cfrac{1}{5 + \cfrac{1}{5 + \cfrac{1}{4 + \ddots}}}}$
 **Raw LaTeX:**  
 ^{238}{92}\mathrm{U} + ^{64}{28}\mathrm{Ni} ;\rightarrow;^{302}_{120}\mathrm{Ubn}^{*} ;\rightarrow; \textit{fission only}
 
-yaml
-Copy code
 
 **Rendered:**  
 $^{238}_{92}\mathrm{U} + ^{64}_{28}\mathrm{Ni} \;\rightarrow\;^{302}_{120}\mathrm{Ubn}^{*} \;\rightarrow\; \textit{fission only}$
@@ -97,8 +82,6 @@ $^{238}_{92}\mathrm{U} + ^{64}_{28}\mathrm{Ni} \;\rightarrow\;^{302}_{120}\mathr
 **Raw LaTeX:**  
 0 \rightarrow G^\wedge \xrightarrow{\pi^\wedge} X^\wedge \xrightarrow{i^\wedge} H^\wedge \rightarrow 0
 
-yaml
-Copy code
 
 **Rendered:**  
 $0 \rightarrow G^\wedge \xrightarrow{\pi^\wedge} X^\wedge \xrightarrow{i^\wedge} H^\wedge \rightarrow 0$
@@ -109,8 +92,6 @@ $0 \rightarrow G^\wedge \xrightarrow{\pi^\wedge} X^\wedge \xrightarrow{i^\wedge}
 **Raw LaTeX:**  
 w = \begin{cases} w^* & \text{if } w^* > \frac{1}{2}, \ \frac{1}{2} & \text{if } w^* \le \frac{1}{2}. \end{cases}
 
-yaml
-Copy code
 
 **Rendered:**  
 $w = \begin{cases} w^* & \text{if } w^* > \frac{1}{2}, \\ \frac{1}{2} & \text{if } w^* \le \frac{1}{2}. \end{cases}$
@@ -121,8 +102,6 @@ $w = \begin{cases} w^* & \text{if } w^* > \frac{1}{2}, \\ \frac{1}{2} & \text{if
 **Raw LaTeX:**  
 \begin{bmatrix} V_1 \ I_2 \end{bmatrix} = \begin{bmatrix} h_{11} & h_{12} \ h_{21} & h_{22} \end{bmatrix} \begin{bmatrix} I_1 \ V_2 \end{bmatrix}
 
-yaml
-Copy code
 
 **Rendered:**  
 $\begin{bmatrix} V_1 \\ I_2 \end{bmatrix} = \begin{bmatrix} h_{11} & h_{12} \\ h_{21} & h_{22} \end{bmatrix} \begin{bmatrix} I_1 \\ V_2 \end{bmatrix}$
@@ -133,8 +112,6 @@ $\begin{bmatrix} V_1 \\ I_2 \end{bmatrix} = \begin{bmatrix} h_{11} & h_{12} \\ h
 **Raw LaTeX:**  
 L(\lambda, \alpha, s) = \sum_{n=0}^{\infty} \frac{\exp(2\pi i\lambda n)}{(n+\alpha)^s}.
 
-yaml
-Copy code
 
 **Rendered:**  
 $L(\lambda, \alpha, s) = \sum_{n=0}^{\infty} \frac{\exp(2\pi i\lambda n)}{(n+\alpha)^s}.$
@@ -145,8 +122,6 @@ $L(\lambda, \alpha, s) = \sum_{n=0}^{\infty} \frac{\exp(2\pi i\lambda n)}{(n+\al
 **Raw LaTeX:**  
 ax^{2} + bx + c = 0
 
-yaml
-Copy code
 
 **Rendered:**  
 $ax^{2} + bx + c = 0$
@@ -157,8 +132,6 @@ $ax^{2} + bx + c = 0$
 **Raw LaTeX:**  
 O(mn \log m)
 
-yaml
-Copy code
 
 **Rendered:**  
 $O(mn \log m)$
@@ -169,8 +142,6 @@ $O(mn \log m)$
 **Raw LaTeX:**  
 A \oplus B = (A^c \ominus B^s)^c
 
-yaml
-Copy code
 
 **Rendered:**  
 $A \oplus B = (A^c \ominus B^s)^c$
@@ -181,8 +152,6 @@ $A \oplus B = (A^c \ominus B^s)^c$
 **Raw LaTeX:**  
 \cos \alpha = -\cos \beta \cos \gamma + \sin \beta \sin \gamma \cosh \frac{a}{k},
 
-yaml
-Copy code
 
 **Rendered:**  
 $\cos \alpha = -\cos \beta \cos \gamma + \sin \beta \sin \gamma \cosh \frac{a}{k}$
@@ -193,8 +162,6 @@ $\cos \alpha = -\cos \beta \cos \gamma + \sin \beta \sin \gamma \cosh \frac{a}{k
 **Raw LaTeX:**  
 \forall x, y \in A \ [x \neq y \rightarrow \neg \exists z \in X \ [z \leq x \wedge z \leq y]]
 
-yaml
-Copy code
 
 **Rendered:**  
 $\forall x, y \in A \ [x \neq y \rightarrow \neg \exists z \in X \ [z \leq x \wedge z \leq y]]$
@@ -205,8 +172,6 @@ $\forall x, y \in A \ [x \neq y \rightarrow \neg \exists z \in X \ [z \leq x \we
 **Raw LaTeX:**  
 \tau_{\text{rms}} = \sqrt{\frac{\int_{0}^{\infty} (\tau - \bar{\tau})^{2} A_c(\tau), d\tau}{\int_{0}^{\infty} A_c(\tau), d\tau}}
 
-yaml
-Copy code
 
 **Rendered:**  
 $\tau_{\text{rms}} = \sqrt{\frac{\int_{0}^{\infty} (\tau - \bar{\tau})^{2} A_c(\tau)\, d\tau}{\int_{0}^{\infty} A_c(\tau)\, d\tau}}$
@@ -217,8 +182,6 @@ $\tau_{\text{rms}} = \sqrt{\frac{\int_{0}^{\infty} (\tau - \bar{\tau})^{2} A_c(\
 **Raw LaTeX:**  
 x - 1 - \frac{1}{2} - \frac{1}{4} - \frac{1}{5} - \frac{1}{6} - \frac{1}{9} - \cdots = 1
 
-yaml
-Copy code
 
 **Rendered:**  
 $x - 1 - \frac{1}{2} - \frac{1}{4} - \frac{1}{5} - \frac{1}{6} - \frac{1}{9} - \cdots = 1$
@@ -229,8 +192,7 @@ $x - 1 - \frac{1}{2} - \frac{1}{4} - \frac{1}{5} - \frac{1}{6} - \frac{1}{9} - \
 **Raw LaTeX:**  
 P(x_{i}) = \frac{N!}{n_{x}!(N-n_{x})!} p^{n_{x}}{x} (1-p{x})^{N-n_{x}}
 
-yaml
-Copy code
+
 
 **Rendered:**  
 $P(x_{i}) = \frac{N!}{n_{x}!(N-n_{x})!} p^{n_{x}}_{x} (1-p_{x})^{N-n_{x}}$
@@ -241,11 +203,13 @@ $P(x_{i}) = \frac{N!}{n_{x}!(N-n_{x})!} p^{n_{x}}_{x} (1-p_{x})^{N-n_{x}}$
 **Raw LaTeX:**  
 H_{ij} = \begin{bmatrix} \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial z_{j}} \ \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial z_{j}} \ \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial z_{j}} \end{bmatrix}
 
-yaml
-Copy code
 
 **Rendered:**  
-$H_{ij} = \begin{bmatrix} \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial z_{j}} \\ \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial z_{j}} \\ \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial z_{j}} \end{bmatrix}$
+H_{ij} = \begin{bmatrix} 
+\frac{\partial^{2}V_{ij}}{\partial x_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial z_{j}} \\ 
+\frac{\partial^{2}V_{ij}}{\partial y_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial z_{j}} \\ 
+\frac{\partial^{2}V_{ij}}{\partial z_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial z_{j}} 
+\end{bmatrix}
 
 ---
 
@@ -253,8 +217,6 @@ $H_{ij} = \begin{bmatrix} \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial x_{j}
 **Raw LaTeX:**  
 r_{xy} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{(n-1) s_x s_y} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n} (x_i - \bar{x})^2 \sum_{i=1}^{n} (y_i - \bar{y})^2}},
 
-latex
-Copy code
 
 **Rendered:**  
 $r_{xy} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{(n-1) s_x s_y} = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n} (x_i - \bar{x})^2 \sum_{i=1}^{n} (y_i - \bar{y})^2}}$
