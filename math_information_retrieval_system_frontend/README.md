@@ -18,7 +18,8 @@ The frontend is **platform-aware** and uses different approaches to render HTML 
 
 - Input math expressions in LaTeX/MathML format.
 - Send queries to the backend API.
-- Display retrieved results with relevance ratings (0, 1, 2).
+- Display retrieved results file names.
+- View the particular file content. 
 - Responsive and interactive UI for web and mobile.
 - Platform-specific HTML viewers:
   - **Web:** Uses `HtmlElementView` and modern web APIs with an `<iframe>` for enhanced MathML support.
