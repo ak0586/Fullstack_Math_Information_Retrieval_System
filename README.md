@@ -205,11 +205,11 @@ H_{ij} = \begin{bmatrix} \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial x_{j}}
 
 
 **Rendered:**  
-H_{ij} = \begin{bmatrix} 
+$H_{ij} = \begin{bmatrix} 
 \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial x_{i}\partial z_{j}} \\ 
 \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial y_{i}\partial z_{j}} \\ 
 \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial x_{j}} & \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial y_{j}} & \frac{\partial^{2}V_{ij}}{\partial z_{i}\partial z_{j}} 
-\end{bmatrix}
+\end{bmatrix}$
 
 ---
 
