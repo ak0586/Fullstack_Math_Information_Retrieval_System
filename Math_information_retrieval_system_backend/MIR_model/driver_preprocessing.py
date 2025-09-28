@@ -3,7 +3,7 @@ from preprocessing import preprocess_dataset, save_preprocessed_data, MathSymbol
 # Driver code of preprocessing
 
 symbol_table = MathSymbolBitVector()  # Initialize your symbol table
-folder_path = "E:/ntcir_mathir/DATASET/NTCIR_2014_dataset_HTML5_1"
+folder_path = "E:/ntcir_mathir/DATASET/NTCIR_2014_dataset_HTML5_2"
     
  # Preprocess dataset
 preprocessed_output = preprocess_dataset(folder_path, symbol_table)

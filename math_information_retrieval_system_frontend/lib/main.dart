@@ -18,7 +18,7 @@ class MathSearchApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Math Search Engine',
+      title: 'ClustoMath',
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -66,19 +66,19 @@ class _SearchHomePageState extends State<SearchHomePage>
 
   String getBaseUrl() {
     if (kIsWeb) {
-      return 'http://127.0.0.1:8000'; // Web
+      return 'http://13.62.76.152'; // Web
     } else if (Platform.isAndroid) {
       if (kDebugMode) {
         // Check if running on emulator or actual device
         // return 'http://10.0.2.2:8000'; // Android Emulator (for development)
         // For actual Android device, use your computer's IP address:
-        return 'http://192.168.31.72:8000'; // Replace with your computer's actual IP
+        return 'http://13.62.76.152'; // Replace with your computer's actual IP
       } else {
         // Production - use your server's IP or domain
-        return 'http://192.168.31.72:8000'; // Replace with actual server IP
+        return 'http://13.62.76.152'; // Replace with actual server IP
       }
     } else {
-      return 'http://127.0.0.1:8000'; // iOS Simulator or Desktop
+      return 'http://13.62.76.152:'; // iOS Simulator or Desktop
     }
   }
 
@@ -215,7 +215,7 @@ class _SearchHomePageState extends State<SearchHomePage>
       resizeToAvoidBottomInset: true, // This helps with keyboard handling
       appBar: AppBar(
         title: Text(
-          'Math Search Engine',
+          '        ClustoMath\n Math Search Engine',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: Colors.deepPurple,
@@ -501,6 +501,7 @@ class _SearchHomePageState extends State<SearchHomePage>
                             ),
                             SizedBox(height: 24),
                             Text(
+                              textAlign: TextAlign.center,
                               'Search Mathematical Expressions',
                               style: TextStyle(
                                 fontSize: 24,
