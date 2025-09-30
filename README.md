@@ -376,7 +376,7 @@ Returns HTML content with MathML.
 ## 📜 License & Usage
 
 **Author:** Ankit Kumar, Chirag Sarda, Rajan Kumar Singh
-**Email:** [ankit.kumar@aus.ac.in](mailto:ankit.kumar@aus.ac.in), [chiragsarda12@gmail.com](chiragsarda12@gmail.com)
+**Email:** [ankit.kumar@aus.ac.in](mailto:ankit.kumar@aus.ac.in), [chiragsarda12@gmail.com](chiragsarda12@gmail.com) [er.vishalgour@gmail.com](mailto:er.vishalgour@gmail.com).
 
 This repository is for **demonstration purposes only**.
 
