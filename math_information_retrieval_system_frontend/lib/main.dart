@@ -66,19 +66,19 @@ class _SearchHomePageState extends State<SearchHomePage>
 
   String getBaseUrl() {
     if (kIsWeb) {
-      return 'http://13.62.76.152'; // Web
+      return 'http://16.16.192.57'; // Web
     } else if (Platform.isAndroid) {
       if (kDebugMode) {
         // Check if running on emulator or actual device
         // return 'http://10.0.2.2:8000'; // Android Emulator (for development)
         // For actual Android device, use your computer's IP address:
-        return 'http://13.62.76.152'; // Replace with your computer's actual IP
+        return 'http://16.16.192.57'; // Replace with your computer's actual IP
       } else {
         // Production - use your server's IP or domain
-        return 'http://13.62.76.152'; // Replace with actual server IP
+        return 'http://16.16.192.57'; // Replace with actual server IP
       }
     } else {
-      return 'http://13.62.76.152:'; // iOS Simulator or Desktop
+      return 'http://16.16.192.57'; // iOS Simulator or Desktop
     }
   }
 
