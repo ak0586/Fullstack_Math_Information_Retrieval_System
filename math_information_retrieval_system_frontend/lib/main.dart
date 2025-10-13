@@ -66,19 +66,19 @@ class _SearchHomePageState extends State<SearchHomePage>
 
   String getBaseUrl() {
     if (kIsWeb) {
-      return 'http://16.16.192.57'; // Web
+      return 'https://clustomath.duckdns.org'; // Web
     } else if (Platform.isAndroid) {
       if (kDebugMode) {
         // Check if running on emulator or actual device
         // return 'http://10.0.2.2:8000'; // Android Emulator (for development)
         // For actual Android device, use your computer's IP address:
-        return 'http://16.16.192.57'; // Replace with your computer's actual IP
+        return 'https://clustomath.duckdns.org'; // Replace with your computer's actual IP
       } else {
         // Production - use your server's IP or domain
-        return 'http://16.16.192.57'; // Replace with actual server IP
+        return 'https://clustomath.duckdns.org'; // Replace with actual server IP
       }
     } else {
-      return 'http://16.16.192.57'; // iOS Simulator or Desktop
+      return 'https://clustomath.duckdns.org'; // iOS Simulator or Desktop
     }
   }
 
