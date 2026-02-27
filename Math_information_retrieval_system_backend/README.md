@@ -8,6 +8,10 @@ This is the **backend** of the Mathematical Information Retrieval (MIR) system.
 It handles indexing, clustering, and retrieval of mathematical expressions.
 
 ---
+## Contributors
+# Ankit Kumar - ak0586
+# Chirag Sarda - chirag0521
+# Rajan Kumar Singh
 
 ## Features
 
