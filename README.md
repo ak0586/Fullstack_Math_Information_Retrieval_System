@@ -8,10 +8,10 @@ It supports **LaTeX/MathML search**, **cross-platform rendering**, and **fast re
 
 ---
 ### Developed by
-# @ak0586
-# @chirag0521
-# @er-vishalgour
-# @rajanks
+* @ak0586
+* @chirag0521
+* @er-vishalgour
+* @rajanks
 
 ## 📌 Features
 
