@@ -7,6 +7,11 @@ This repository contains **both** the Flutter frontend and the FastAPI backend f
 It supports **LaTeX/MathML search**, **cross-platform rendering**, and **fast retrieval** of mathematical documents.
 
 ---
+### Developed by
+# @ak0586
+# @chirag0521
+# @er-vishalgour
+# @rajanks
 
 ## 📌 Features
 
@@ -375,7 +380,7 @@ Returns HTML content with MathML.
 
 ## 📜 License & Usage
 
-**Author:** Ankit Kumar, Chirag Sarda, Rajan Kumar Singh
+**Author:** Ankit Kumar, Chirag Sarda, Vishal Gaur, Rajan Kumar Singh
 **Email:** [ankit.kumar@aus.ac.in](mailto:ankit.kumar@aus.ac.in), [chiragsarda12@gmail.com](chiragsarda12@gmail.com), [er.vishalgour@gmail.com](mailto:er.vishalgour@gmail.com).
 
 This repository is for **demonstration purposes only**.
