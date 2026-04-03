@@ -106,7 +106,7 @@ async def lifespan(app: FastAPI):
             logger.info("Falling back to creating new clustering index...")
             clusterer = clustering_and_indexing()
     
-    # Start background cleanup task
+    # Start background cleanup tasks
     asyncio.create_task(session_cleanup_task())
     yield
     print("👋 Lifespan hook shutting down")
