@@ -91,7 +91,7 @@ async def lifespan(app: FastAPI):
     
     index_storage = 'math_index_storage'
     
-    # Check if index storage is valid and complete
+    # Check if index storage is valid and completed
     if not is_index_storage_valid(index_storage):
         logger.info("Index storage is invalid, missing, or incomplete. Creating new clustering index...")
         clusterer = clustering_and_indexing()
@@ -106,7 +106,7 @@ async def lifespan(app: FastAPI):
             logger.info("Falling back to creating new clustering index...")
             clusterer = clustering_and_indexing()
     
-    # Start background cleanup task
+    # Start background cleanup tasks
     asyncio.create_task(session_cleanup_task())
     yield
     print("👋 Lifespan hook shutting down")
