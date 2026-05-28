@@ -79063,12 +79063,12 @@ pz(){var s=0,r=A.S(t.H),q=1,p=[],o=this,n,m,l,k,j,i,h,g,f,e,d
 var $async$pz=A.O(function(a,b){if(a===1){p.push(b)
 s=q}for(;;)switch(s){case 0:o.ak(new A.af4(o))
 q=3
-j=A.fh(o.a.f+"/fetch_file_content")
+j=A.fh(o.a.f+"/search")
 i=t.N
 h=A.ak(["Content-Type","application/json"],i,i)
 g=o.a
 s=6
-return A.U(A.awt(j,B.c5.kB(A.ak(["session_id",g.c,"file_id",g.d],i,i)),h),$async$pz)
+return A.U(A.awt(j,B.c5.kB(A.ak(["query","__VIEW__:"+g.c+":"+g.d],i,i)),h),$async$pz)
 case 6:n=b
 if(n.b===200){j=n
 m='<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset="utf-8">\n    <script type="text/javascript" id="MathJax-script" async\n      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/mml-chtml.js">\n    </script>\n    <style>\n      body {\n        margin: 10px;\n        padding: 5px;\n        font-family: sans-serif;\n      }\n      mjx-container {\n        all: unset;\n        display: inline;\n      }\n      mjx-container[display="block"] {\n        display: block;\n        text-align: left;\n      }\n    </style>\n  </head>\n  <body>\n    '+A.apn(A.ap0(j.e)).ei(j.w)+"\n  </body>\n</html>\n"
