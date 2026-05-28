@@ -66,19 +66,21 @@ class _SearchHomePageState extends State<SearchHomePage>
 
   String getBaseUrl() {
     if (kIsWeb) {
+      if (kDebugMode) {
+        return 'http://localhost:8000';
+      }
       return 'https://ankit3105-math-retrieval-backend.hf.space'; // Web
     } else if (Platform.isAndroid) {
       if (kDebugMode) {
-        // Check if running on emulator or actual device
-        // return 'http://10.0.2.2:8000'; // Android Emulator (for development)
-        // For actual Android device, use your computer's IP address:
-        return 'https://ankit3105-math-retrieval-backend.hf.space'; // Replace with your computer's actual IP
+        return 'http://10.0.2.2:8000'; // Android Emulator
       } else {
-        // Production - use your server's IP or domain
-        return 'https://ankit3105-math-retrieval-backend.hf.space'; // Replace with actual server IP
+        return 'https://ankit3105-math-retrieval-backend.hf.space';
       }
     } else {
-      return 'https://ankit3105-math-retrieval-backend.hf.space'; // iOS Simulator or Desktop
+      if (kDebugMode) {
+        return 'http://localhost:8000';
+      }
+      return 'https://ankit3105-math-retrieval-backend.hf.space';
     }
   }
 

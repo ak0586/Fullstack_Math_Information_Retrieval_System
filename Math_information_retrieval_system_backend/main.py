@@ -207,14 +207,6 @@ async def view_file_helper(session_id: str, file_id: str):
     else:
         relative_path = normalized_path
         
-    static_url = os.getenv("STATIC_DATASET_URL")
-    if static_url:
-        # TextArticles is flat on B2 bucket, strip subfolders if legacy path is used
-        if 'TextArticles/' in relative_path:
-            relative_path = f"TextArticles/{os.path.basename(relative_path)}"
-        target_url = f"{static_url.rstrip('/')}/{relative_path}"
-        return RedirectResponse(url=target_url)
-        
     # Resolve relative path against the container's configured dataset path
     dataset_root = os.getenv("DATASET_PATH", "Dataset")
     filepath = os.path.normpath(os.path.join(dataset_root, relative_path))
