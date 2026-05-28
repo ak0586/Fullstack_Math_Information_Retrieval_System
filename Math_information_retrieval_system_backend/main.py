@@ -207,7 +207,7 @@ async def query(query_data: user_query):
         }
     )
 
-@app.post("/fetch_file_content")
+@app.post("/search/document")
 async def view_file(request_data: FileViewRequest):
     session_id = request_data.session_id
     file_id = request_data.file_id
