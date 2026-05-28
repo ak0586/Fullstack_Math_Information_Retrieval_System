@@ -31,7 +31,7 @@ try:
     print(f"First result: ID={file_id}, Filename={filename}")
     
     # Step 2: Query /view endpoint
-    view_url = f"{base_url}/document/{session_id}/{file_id}"
+    view_url = f"{base_url}/fetch_file_content/{session_id}/{file_id}"
     print(f"\n2. Fetching file view from {view_url}...")
     view_res = requests.get(view_url, timeout=15)
     print(f"View Status: {view_res.status_code}")
