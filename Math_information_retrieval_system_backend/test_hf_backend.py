@@ -39,8 +39,11 @@ try:
     print("View Headers:", dict(view_res.headers))
     if view_res.status_code == 200:
         print("File loaded successfully!")
+        import base64
         html_data = view_res.json()
-        print(f"HTML Content preview (first 500 chars):\n{html_data.get('html', '')[:500]}")
+        encoded_html = html_data.get('html', '')
+        decoded_html = base64.b64decode(encoded_html.encode('utf-8')).decode('utf-8')
+        print(f"HTML Content preview (first 500 chars):\n{decoded_html[:500]}")
     else:
         print("Error response text:")
         print(view_res.text)

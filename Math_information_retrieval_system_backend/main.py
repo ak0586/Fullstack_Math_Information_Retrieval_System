@@ -17,6 +17,7 @@ import boto3
 from typing import Dict, Optional
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+import base64
 
 
 # ----------------- Logging -----------------
@@ -223,7 +224,8 @@ async def view_file_helper(session_id: str, file_id: str):
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 html_content = f.read()
-            return JSONResponse(status_code=200, content={"html": html_content})
+            encoded_html = base64.b64encode(html_content.encode('utf-8')).decode('utf-8')
+            return JSONResponse(status_code=200, content={"html": encoded_html})
         except Exception as e:
             logger.error(f"Error reading local file: {e}")
         
@@ -239,7 +241,8 @@ async def view_file_helper(session_id: str, file_id: str):
             logger.info(f"Fetching {b2_key} privately from B2...")
             response = s3_client.get_object(Bucket=bucket_name, Key=b2_key)
             html_content = response['Body'].read().decode('utf-8')
-            return JSONResponse(status_code=200, content={"html": html_content})
+            encoded_html = base64.b64encode(html_content.encode('utf-8')).decode('utf-8')
+            return JSONResponse(status_code=200, content={"html": encoded_html})
         except Exception as e:
             logger.error(f"Error fetching {relative_path} from B2: {e}")
             raise HTTPException(status_code=500, detail="Failed to fetch file from cloud storage.")

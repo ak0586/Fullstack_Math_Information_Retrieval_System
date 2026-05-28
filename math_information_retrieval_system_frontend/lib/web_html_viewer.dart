@@ -55,7 +55,8 @@ class _FileViewerPageState extends State<FileViewerPage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final htmlContent = data['html'] as String;
+        final encodedHtml = data['html'] as String;
+        final htmlContent = utf8.decode(base64.decode(encodedHtml.replaceAll('\n', '').replaceAll('\r', '').trim()));
         // Create enhanced HTML with better MathML support for web
         final enhancedHtml = _createEnhancedHtml(htmlContent);
 
