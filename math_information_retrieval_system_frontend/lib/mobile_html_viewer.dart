@@ -62,7 +62,9 @@ class _FileViewerPageState extends State<FileViewerPage> {
       );
 
       if (response.statusCode == 200) {
-        final injectedHtml = response.body
+        final data = json.decode(response.body);
+        final htmlContent = data['html'] as String;
+        final injectedHtml = htmlContent
             .replaceFirst('</head>', """
 <script>
   window.MathJax = {

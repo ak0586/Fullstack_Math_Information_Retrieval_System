@@ -39,7 +39,8 @@ try:
     print("View Headers:", dict(view_res.headers))
     if view_res.status_code == 200:
         print("File loaded successfully!")
-        print(f"HTML Content preview (first 500 chars):\n{view_res.text[:500]}")
+        html_data = view_res.json()
+        print(f"HTML Content preview (first 500 chars):\n{html_data.get('html', '')[:500]}")
     else:
         print("Error response text:")
         print(view_res.text)

@@ -220,7 +220,12 @@ async def view_file_helper(session_id: str, file_id: str):
     
     # Try local file first (if running locally or volume is mounted)
     if os.path.exists(filepath):
-        return FileResponse(filepath, media_type="text/html")
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                html_content = f.read()
+            return JSONResponse(status_code=200, content={"html": html_content})
+        except Exception as e:
+            logger.error(f"Error reading local file: {e}")
         
     # Fallback: Private streaming from Backblaze B2 (safe for Private buckets!)
     s3_client, bucket_name = get_b2_client_and_bucket()
@@ -234,7 +239,7 @@ async def view_file_helper(session_id: str, file_id: str):
             logger.info(f"Fetching {b2_key} privately from B2...")
             response = s3_client.get_object(Bucket=bucket_name, Key=b2_key)
             html_content = response['Body'].read().decode('utf-8')
-            return HTMLResponse(content=html_content)
+            return JSONResponse(status_code=200, content={"html": html_content})
         except Exception as e:
             logger.error(f"Error fetching {relative_path} from B2: {e}")
             raise HTTPException(status_code=500, detail="Failed to fetch file from cloud storage.")

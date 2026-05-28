@@ -54,8 +54,10 @@ class _FileViewerPageState extends State<FileViewerPage> {
       );
 
       if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final htmlContent = data['html'] as String;
         // Create enhanced HTML with better MathML support for web
-        final enhancedHtml = _createEnhancedHtml(response.body);
+        final enhancedHtml = _createEnhancedHtml(htmlContent);
 
         // Create iframe element using modern web API
         final iframeElement = web.HTMLIFrameElement()
