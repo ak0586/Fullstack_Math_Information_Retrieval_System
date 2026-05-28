@@ -79072,7 +79072,7 @@ s=q}for(;;)switch(s){case 0:o.ak(new A.af4(o))
 q=3
 j=o.a
 s=6
-return A.U(A.aK2(A.fh(j.f+"/view/"+j.c+"/"+j.d)),$async$pA)
+return A.U(A.aK2(A.fh(j.f+"/document/"+j.c+"/"+j.d)),$async$pA)
 case 6:n=b
 if(n.b===200){j=n
 m='<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset="utf-8">\n    <script type="text/javascript" id="MathJax-script" async\n      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/mml-chtml.js">\n    </script>\n    <style>\n      body {\n        margin: 10px;\n        padding: 5px;\n        font-family: sans-serif;\n      }\n      mjx-container {\n        all: unset;\n        display: inline;\n      }\n      mjx-container[display="block"] {\n        display: block;\n        text-align: left;\n      }\n    </style>\n  </head>\n  <body>\n    '+A.apo(A.ap1(j.e)).ei(j.w)+"\n  </body>\n</html>\n"
