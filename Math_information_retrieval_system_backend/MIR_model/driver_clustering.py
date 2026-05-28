@@ -1,16 +1,18 @@
-# '''
 import os
-from .cluster_index import MathClusterIndex
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from MIR_model.cluster_index import MathClusterIndex
 
 def clustering_and_indexing():
-    # CLustering driver module
-    os.makedirs("math_index_storage", exist_ok=True)
-    # print_centroids
+    # Clustering driver module
+    index_storage = os.getenv("INDEX_STORAGE_PATH", "./math_index_storage")
+    os.makedirs(index_storage, exist_ok=True)
     # Initialize the cluster index
-    index = MathClusterIndex(max_clusters=14, base_dir="./math_index_storage")
+    index = MathClusterIndex(max_clusters=14, base_dir=index_storage)
     
-    # Load preprocessed data
-    preprocessed_data=index.load_preprocessed_data("MIR_model/preprocessed_data.pkl")
+    # Load unique bitvectors from the SQLite database
+    preprocessed_data = index.load_preprocessed_data()
     unique_bitvectors = index.extract_unique_bitvectors(preprocessed_data)
     print(f"Extracted {len(unique_bitvectors)} unique bitvectors for clustering")
     
@@ -21,14 +23,10 @@ def clustering_and_indexing():
         print(f"Training on batch {i+1}/{len(bitvector_batches)}")
         index.train_on_bitvector_batch(batch, i+1)
 
-
-
-   
-    # Finish training - this will assign all bitvectors to final clusters
-    print("Training complete, assigning all bitvectors to clusters...")
+    # Finish training - this will assign all bitvectors to final clusters in SQLite
+    print("Training complete, assigning all bitvectors to clusters in database...")
     index.finish_training()
     return index
-# clustering_and_indexing()
-    # Verify that bitvectors have been assigned to clusters
-    # print(f"Bitvectors assigned to clusters: {len(index.bitvector_to_cluster)}")
-    # '''
+
+if __name__ == '__main__':
+    clustering_and_indexing()

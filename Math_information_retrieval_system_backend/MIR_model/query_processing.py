@@ -24,7 +24,10 @@ def process_query(query: str, converter: MathConverter, clusterer: MathClusterIn
             if bit_vector:
                 print("\nQuery Details:")
                 print("Bit-Vector:", bit_vector)
-                print("MathML: ", mathml)
+                try:
+                    print("MathML: ", mathml)
+                except UnicodeEncodeError:
+                    print("MathML: (unicode characters omitted due to console encoding)")
                 
                 # Search with both bitvector and latex
                 results = clusterer.search(bit_vector, query)

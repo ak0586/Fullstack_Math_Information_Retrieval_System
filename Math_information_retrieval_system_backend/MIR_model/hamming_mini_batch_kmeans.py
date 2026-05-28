@@ -1,7 +1,4 @@
-# Customized minibatch kmeans for bitvector with serial minibatches
-
 import numpy as np
-from scipy.stats import mode
 from tqdm import tqdm
 
 class HammingMiniBatchKMeans:
@@ -20,20 +17,14 @@ class HammingMiniBatchKMeans:
         Calculate inverse Hamming distance between samples in X and centroids.
         
         Hamming distance = proportion of bits that differ
-        Inverse Hamming distance = 1 - Hamming distance = proportion of bits that match
         
-        Returns negative similarity (to be minimized in K-means)
+        Vectorized implementation using numpy broadcasting.
         """
-        n_features = X.shape[1]
-        
-        # Calculate Hamming distances (proportion of differing bits)
-        hamming_distances = np.array([[np.sum(x != c) / n_features for c in centroids] for x in X])
-        
-        # Convert to inverse Hamming distance (similarity)
-        # inverse_hamming = 1 - hamming_distances
-        
-        # Return similarity (to be maximized)
-        return hamming_distances
+        # X shape: (N, D), centroids shape: (K, D)
+        # X[:, None, :] != centroids[None, :, :] has shape (N, K, D)
+        # diff.sum(axis=2) has shape (N, K)
+        diff = X[:, None, :] != centroids[None, :, :]
+        return diff.sum(axis=2) / X.shape[1]
 
     def _compute_binary_centroid(self, vectors):
         """

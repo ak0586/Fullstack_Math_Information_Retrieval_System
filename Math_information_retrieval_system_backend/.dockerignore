@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+temp_verification_dataset/
+processing_tracker/
+.gemini/
+.env
+Dockerfile
+.dockerignore
+backblaze.txt

@@ -1,0 +1,10 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Secrets / Configuration
+.env
+/Math_information_retrieval_system_backend/backblaze.txt
+
+# Large files / Local database index
+/Math_information_retrieval_system_backend/math_index_storage/

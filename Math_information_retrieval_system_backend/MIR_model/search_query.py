@@ -11,10 +11,7 @@ def query_search(query:str,clusterer:MathClusterIndex):
     converter = MathConverter()
     # clusterer = MathClusterIndex()
     results, search_time = process_query(query, converter, clusterer)
-        # Use updated display_results for single query
-    if results:
-        # display_results(results, search_time)
-        return results, search_time
+    return results if results is not None else [], search_time
     
     
 # results=query_search(r'[{\cal A}(I_{1}),{\cal A}(I_{2})]=0')

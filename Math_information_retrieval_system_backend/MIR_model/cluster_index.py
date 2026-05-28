@@ -1,55 +1,98 @@
-
-import pickle
-from .clustering_phase import ProcessingState,ClusterStorage
+import sqlite3
 from rapidfuzz import fuzz
 from .hamming_mini_batch_kmeans import HammingMiniBatchKMeans
+from .database import MIRDatabase
 import numpy as np
-from typing import List,Dict
+from typing import List, Dict, Tuple, Optional
 import os
 from datetime import datetime
 from collections import defaultdict
+import re
 
+def canonicalize_latex(latex_str: str) -> str:
+    """
+    Standardize LaTeX formula syntax to improve character-level comparison accuracy.
+    """
+    if not latex_str:
+        return ""
+        
+    # 1. Remove common math spacing commands
+    spacing_commands = [
+        r'\\quad', r'\\qquad', r'\\,', r'\\:', r'\\;', r'\\!', r'\\ ', r'\\tilde'
+    ]
+    for cmd in spacing_commands:
+        latex_str = re.sub(cmd, '', latex_str)
+        
+    # 2. Strip formatting commands but keep their contents
+    # e.g., \mathrm{x} -> x, \mathbf{V} -> V, \text{...} -> ...
+    formatting_patterns = [
+        r'\\mathrm{(.*?)}',
+        r'\\mathbf{(.*?)}',
+        r'\\mathit{(.*?)}',
+        r'\\mathcal{(.*?)}',
+        r'\\mathfrak{(.*?)}',
+        r'\\mathbb{(.*?)}',
+        r'\\text{(.*?)}',
+        r'\\cal{(.*?)}',
+    ]
+    for pattern in formatting_patterns:
+        latex_str = re.sub(pattern, r'\1', latex_str)
+        
+    # Handle brackets-based formatting tags without braces if they exist (e.g. {\cal A})
+    latex_str = re.sub(r'{\\cal\s+(.*?)}', r'\1', latex_str)
+    latex_str = re.sub(r'{\\bf\s+(.*?)}', r'\1', latex_str)
+    
+    # Strip standalone commands like \limits, \textstyle, \displaystyle
+    standalone_commands = [r'\\limits', r'\\textstyle', r'\\displaystyle', r'\\boldmath']
+    for cmd in standalone_commands:
+        latex_str = re.sub(cmd, '', latex_str)
 
-# Processed batch 1 with 1000 bitvectors
+    # 3. Standardize scripts by enforcing braces
+    # e.g., x^2 -> x^{2}, y_i -> y_{i}
+    latex_str = re.sub(r'_([a-zA-Z0-9])(?![{])', r'_{\1}', latex_str)
+    latex_str = re.sub(r'\^([a-zA-Z0-9])(?![{])', r'^{\1}', latex_str)
+    
+    # 4. Remove all whitespace
+    latex_str = re.sub(r'\s+', '', latex_str)
+    
+    return latex_str
+
 def rapidfuzz_similarity(str1, str2):
-    if str1==str2:
+    c1 = canonicalize_latex(str1)
+    c2 = canonicalize_latex(str2)
+    if c1 == c2:
         return 1.0
-    """Calculate similarity between two LaTeX strings"""
-    return fuzz.ratio(str1, str2) / 100.0
-# Cluster Centers:
-# Model status
-# print_centroids
+    return fuzz.ratio(c1, c2) / 100.0
+
 class MathClusterIndex:              
     def __init__(self, max_clusters=14, batch_size=1000, 
                  base_dir="math_index_storage"):
         self.n_cluster = max_clusters
         self.batch_size = batch_size
         self.base_dir = os.path.abspath(base_dir)
-        # Initialize storage components
-        self.cluster_storage = ClusterStorage(os.path.join(base_dir, "clusters"))
-        self.state_manager = ProcessingState(os.path.join(base_dir, "state"))
-        
-        self.cluster_cache = {}  # Cache to store all clusters
-        
-        # Training state tracking
-        self.centroids_initialized = False  # Track if centroids have been initialized
-        self.training_completed = False  # Track if all training is complete
-        
-        # Runtime data structures
-        self.kmeans = None        # self.is_fitted = False
-        self.vector_dim = None
-        
-        # Store all bitvectors and their metadata
-        self.all_bitvectors = {}  # {bitvector: {latex: [directories]}}
         
         # Ensure directories exist
         os.makedirs(self.base_dir, exist_ok=True)
         os.makedirs(os.path.join(self.base_dir, "clusters"), exist_ok=True)
-        os.makedirs(os.path.join(self.base_dir, "state"), exist_ok=True)
+        
+        # Initialize SQLite database manager
+        self.db = MIRDatabase(os.path.join(self.base_dir, "clusters", "math_index.db"))
+        self.cluster_cache = {}  # Cache to store all cluster keys
+        
+        # Training state tracking
+        self.centroids_initialized = False  
+        self.training_completed = False  
+        
+        # Runtime data structures
+        self.kmeans = None        
+        self.vector_dim = None
+        
+        # Backward compatibility wrapper for unique bitvectors list
+        self.all_bitvectors = {}  
         
         # Load initial state
         self._load_processing_state()
-        self.load_all_clusters()  # Load clusters after state is loaded
+        self.load_all_clusters()  
         
         # Print status for better visibility
         if self.training_completed:
@@ -59,86 +102,97 @@ class MathClusterIndex:
             print("MathClusterIndex initialized. Training needed before searching.")
 
     def _save_processing_state(self):
-        """Save current processing state"""
+        """Save current processing state to SQLite"""
         try:
-            state = {
-                'kmeans_state': pickle.dumps(self.kmeans) if self.kmeans else None,
-                # 'scaler_state': pickle.dumps(self.scaler) if self.is_fitted else None,
-                # 'is_fitted': self.is_fitted,
-                'vector_dim': self.vector_dim,
-                'centroids_initialized': self.centroids_initialized,
-                'training_completed': self.training_completed,
-                'timestamp': datetime.now().isoformat()
-            }
-            self.state_manager.save_state(state)
-            print(f"Model state saved successfully at {datetime.now().isoformat()}")
+            self.db.set_metadata('n_clusters', self.n_cluster)
+            self.db.set_metadata('batch_size', self.batch_size)
+            self.db.set_metadata('vector_dim', self.vector_dim)
+            self.db.set_metadata('centroids_initialized', int(self.centroids_initialized))
+            self.db.set_metadata('training_completed', int(self.training_completed))
+            
+            if self.kmeans:
+                self.db.set_metadata('kmeans_max_iter', self.kmeans.max_iter)
+                self.db.set_metadata('kmeans_random_state', self.kmeans.random_state if self.kmeans.random_state is not None else "")
+                self.db.set_metadata('kmeans_verbose', int(self.kmeans.verbose))
+                self.db.set_metadata('kmeans_n_iter', self.kmeans.n_iter_)
+                if self.kmeans.cluster_centers_ is not None:
+                    self.db.set_metadata('kmeans_cluster_centers', self.kmeans.cluster_centers_)
+                    
+            print(f"Model state saved successfully to SQLite at {datetime.now().isoformat()}")
         except Exception as e:
             print(f"Error saving processing state: {str(e)}")
 
     def _load_processing_state(self):
-        """Load processing state"""
+        """Load processing state from SQLite"""
         try:
-            state = self.state_manager.load_state()
-            if state:
-                if state.get('kmeans_state'):
-                    self.kmeans = pickle.loads(state['kmeans_state'])
-                    print("KMeans model loaded successfully")
+            centroids_init_str = self.db.get_metadata('centroids_initialized')
+            if centroids_init_str is not None:
+                self.centroids_initialized = bool(int(centroids_init_str))
+                self.training_completed = bool(int(self.db.get_metadata('training_completed') or 0))
+                vector_dim_str = self.db.get_metadata('vector_dim')
+                self.vector_dim = int(vector_dim_str) if vector_dim_str else None
                 
-                # self.is_fitted = state.get('is_fitted', False)
-                self.vector_dim = state.get('vector_dim')
-                self.centroids_initialized = state.get('centroids_initialized', False)
-                self.training_completed = state.get('training_completed', False)
+                # Reconstruct kmeans
+                n_clusters_str = self.db.get_metadata('n_clusters')
+                n_clusters = int(n_clusters_str) if n_clusters_str else self.n_cluster
                 
-                # Print loaded state information
-                if  self.kmeans:
-                    print(f"Model loaded with {self.kmeans.n_clusters} clusters")
-                    print(f"Model training status: {'Complete' if self.training_completed else 'Incomplete'}")
-                    if hasattr(self.kmeans, 'cluster_centers_'):
-                        print(f"Cluster centers shape: {self.kmeans.cluster_centers_.shape}")
-                else:
-                    print("No trained model found in saved state")
-                    
+                batch_size_str = self.db.get_metadata('batch_size')
+                batch_size = int(batch_size_str) if batch_size_str else self.batch_size
+                
+                max_iter_str = self.db.get_metadata('kmeans_max_iter')
+                max_iter = int(max_iter_str) if max_iter_str else 100
+                
+                random_state_str = self.db.get_metadata('kmeans_random_state')
+                random_state = int(random_state_str) if random_state_str else None
+                
+                verbose_str = self.db.get_metadata('kmeans_verbose')
+                verbose = bool(int(verbose_str)) if verbose_str else True
+                
+                n_iter_str = self.db.get_metadata('kmeans_n_iter')
+                n_iter = int(n_iter_str) if n_iter_str else 0
+                
+                self.kmeans = HammingMiniBatchKMeans(
+                    n_clusters=n_clusters,
+                    batch_size=batch_size,
+                    max_iter=max_iter,
+                    random_state=random_state,
+                    verbose=verbose
+                )
+                self.kmeans.n_iter_ = n_iter
+                
+                cluster_centers = self.db.get_metadata('kmeans_cluster_centers', is_array=True)
+                if cluster_centers is not None:
+                    self.kmeans.cluster_centers_ = cluster_centers
+                
+                print("KMeans model loaded successfully from SQLite")
+                print(f"Model loaded with {self.kmeans.n_clusters} clusters")
+                print(f"Model training status: {'Complete' if self.training_completed else 'Incomplete'}")
+                if self.kmeans.cluster_centers_ is not None:
+                    print(f"Cluster centers shape: {self.kmeans.cluster_centers_.shape}")
             else:
                 print("No saved state found - initializing new models")
         except Exception as e:
             print(f"Error loading processing state: {str(e)}")
             print("Initializing with new models")
             
-    def load_preprocessed_data(self, data_path='preprocessed_data.pkl'):
+    def load_preprocessed_data(self):
         """
-        Load preprocessed data in the format:
-        {
-            bitvector1: {
-                latex1: [directory1, directory2, ...],
-                latex2: [directory1, directory2, ...],
-            },
-            bitvector2: { ... },
-        }
+        Wrapper to get unique bitvectors directly from database.
         """
-        try:
-            with open(data_path, 'rb') as f:
-                preprocessed_data = pickle.load(f)
-            
-            print(f"Loaded preprocessed data with {len(preprocessed_data)} bitvectors")
-            
-            # Store the complete data in memory
-            self.all_bitvectors = preprocessed_data
-            
-            return preprocessed_data
-        except Exception as e:
-            print(f"Error loading preprocessed data: {str(e)}")
-            return {}
+        print("Using SQLite unified database.")
+        bvs = self.db.get_unique_bitvectors()
+        self.all_bitvectors = {bv: {} for bv in bvs}
+        return self.all_bitvectors
     
     def extract_unique_bitvectors(self, preprocessed_data):
         """
-        Extract unique bitvectors from preprocessed data
-        Returns a list of unique bitvectors
+        Extract unique bitvectors from preprocessed data.
         """
         return list(preprocessed_data.keys())
     
     def create_bitvector_batches(self, bitvectors, batch_size=1000):
         """
-        Split bitvectors into batches for processing
+        Split bitvectors into batches for processing.
         """
         batches = []
         for i in range(0, len(bitvectors), batch_size):
@@ -155,10 +209,8 @@ class MathClusterIndex:
     def create_feature_matrix_from_bitvectors(self, bitvectors: List[str]) -> np.ndarray:
         """
         Create feature matrix from list of bitvectors
-        Returns matrix X
         """
         vectors = []
-        
         for bitvector in bitvectors:
             try:
                 vector = self.bitvector_to_array(bitvector)
@@ -188,7 +240,6 @@ class MathClusterIndex:
                 print(f"Skipping empty batch {batch_num}")
                 return
             
-                
             # Initialize HammingMiniBatchKMeans only once on first batch
             if not self.centroids_initialized:
                 print(f"Initializing centroids with batch {batch_num}")
@@ -200,15 +251,12 @@ class MathClusterIndex:
                 self.kmeans.fit(X)
                 self.centroids_initialized = True
             else:
-                # Otherwise just partial_fit
                 print(f"Partial fitting with batch {batch_num}")
                 self.kmeans.partial_fit(X)
             
             # Save processing state
             self._save_processing_state()
-            
             print(f"Processed batch {batch_num} with {len(bitvectors)} bitvectors")
-            # self.kmeans.print_centroids()
         except Exception as e:
             print(f"Error processing batch {batch_num}: {str(e)}")
             raise
@@ -216,7 +264,7 @@ class MathClusterIndex:
     def assign_all_bitvectors_to_clusters(self):
         """
         Assign all bitvectors to their final clusters
-        and organize the data for storage
+        and update the database.
         """
         if not self.centroids_initialized:
             print("Cannot assign bitvectors - model not properly fitted")
@@ -224,114 +272,70 @@ class MathClusterIndex:
         
         print("Assigning all bitvectors to final clusters...")
         
-        # Get all unique bitvectors
-        all_bitvectors = list(self.all_bitvectors.keys())
+        # Retrieve all unique bitvectors from SQLite
+        all_bitvectors = self.db.get_unique_bitvectors()
         
         # Process in batches to avoid memory issues
         batch_size = 1000
         num_batches = (len(all_bitvectors) + batch_size - 1) // batch_size
         
-        # Create cluster data structure
-        cluster_data = defaultdict(lambda: defaultdict(list))
-        
+        assignments = []
         for batch_idx in range(num_batches):
             start_idx = batch_idx * batch_size
             end_idx = min((batch_idx + 1) * batch_size, len(all_bitvectors))
             batch_bitvectors = all_bitvectors[start_idx:end_idx]
             
-            # Convert bitvectors to feature matrix
             X = self.create_feature_matrix_from_bitvectors(batch_bitvectors)
-              
-            
-            # Predict clusters
             labels = self.kmeans.predict(X)
             
-            # Assign bitvectors to clusters
             for i, bitvector in enumerate(batch_bitvectors):
                 cluster_id = labels[i]
                 cluster_key = f"C{cluster_id}"
-                
-                # Get all LaTeX expressions and directories for this bitvector
-                for latex, directories in self.all_bitvectors[bitvector].items():
-                    for directory in directories:
-                        metadata_entry = {
-                            'filepath': directory,
-                            'latex': latex,
-                            'vector_id': i
-                        }
-                        cluster_data[cluster_key][bitvector].append(metadata_entry)
+                assignments.append((cluster_key, bitvector))
             
-            print(f"Processed batch {batch_idx+1}/{num_batches} of bitvectors")
+            print(f"Assigned batch {batch_idx+1}/{num_batches} of bitvectors")
         
-        # Update the cluster storage with the final assignments
-        for cluster_key, data in cluster_data.items():
-            self.cluster_storage.update_cluster(cluster_key, data)
+        # Update SQLite in-place
+        print("Updating database with cluster assignments...")
+        self.db.update_cluster_keys(assignments)
         
-        # Save the modified clusters
-        self.cluster_storage.save_modified_clusters()
-        
-        # Mark training as complete
         self.training_completed = True
         self._save_processing_state()
         
-        print("All bitvectors assigned to final clusters")
-        
-        # Reload clusters to ensure we have the latest data
+        print("All bitvectors assigned to final clusters in database")
         self.load_all_clusters()
     
     def finish_training(self):
         """
         Mark training as complete, lock centroids, and assign all bitvectors to final clusters
         """
-        if  self.centroids_initialized:
+        if self.centroids_initialized:
             self.assign_all_bitvectors_to_clusters()
             print("Training completed, centroids locked")
         else:
             print("Cannot finish training - model not properly initialized")
     
     def load_all_clusters(self):
-        """Pre-load all cluster data into memory during initialization"""
+        """Verify and log SQLite database status"""
         try:
-            # Clear current cache
             self.cluster_cache.clear()
-            
-            # Get all cluster files
-            if os.path.exists(self.cluster_storage.indices_dir):
-                cluster_files = [f for f in os.listdir(self.cluster_storage.indices_dir) 
-                               if f.startswith("cluster_") and f.endswith(".pkl")]
-                
-                # Load each cluster into memory
-                for cluster_file in cluster_files:
-                    cluster_key = cluster_file[8:-4]  # Remove "cluster_" prefix and ".pkl" suffix
-                    cluster_data = self.cluster_storage.get_cluster_index(cluster_key)
-                    if cluster_data is not None:
-                        self.cluster_cache[cluster_key] = cluster_data
-                
-                print(f"Successfully loaded {len(self.cluster_cache)} clusters into memory")
-                
-                # Optional: Print memory usage statistics
-                # import sys
-                # memory_usage = sys.getsizeof(self.cluster_cache) / (1024 * 1024)  # Convert to MB
-                # print(f"Approximate memory usage: {memory_usage:.2f} MB")
+            if os.path.exists(self.db.db_path):
+                conn = sqlite3.connect(self.db.db_path)
+                cursor = conn.cursor()
+                cursor.execute("SELECT DISTINCT cluster_key FROM math_expressions WHERE cluster_key IS NOT NULL")
+                clusters = [row[0] for row in cursor.fetchall()]
+                conn.close()
+                for c in clusters:
+                    self.cluster_cache[c] = True 
+                print(f"SQLite Database loaded successfully with {len(self.cluster_cache)} clusters")
             else:
-                print(f"Cluster directory not found: {self.cluster_storage.indices_dir}")
-                
+                print("SQLite database file not found")
         except Exception as e:
-            print(f"Error loading clusters into memory: {str(e)}")
-            raise
+            print(f"Error checking SQLite database: {str(e)}")
 
-    '''            
     def search(self, query_bitvector: str, query_latex: str = None, k: int = None) -> List[Dict]:
         """
         Search for similar expressions using KMeans prediction with neighbor cluster fallback
-        
-        Args:
-            query_bitvector: Bitvector string to search for
-            query_latex: Optional LaTeX string for similarity refinement
-            k: Optional number of results to return
-            
-        Returns:
-            List of matching results sorted by similarity
         """
         if not self.kmeans:
             print("ERROR: Model not fitted or KMeans model not loaded.")
@@ -342,209 +346,39 @@ class MathClusterIndex:
             print("Warning: Searching before training is completed may give inconsistent results")
             
         results = []
-        
         try:
             print("--------------Using Binary Minibatch KMeans prediction---------------")
-            
-            # Convert bitvector to feature vector and predict cluster
             query_vector = self.bitvector_to_array(query_bitvector).reshape(1, -1)
-            
-            
-            
-            # Predict the cluster
             predicted_cluster = self.kmeans.predict(query_vector)[0]
             cluster_key = f"C{predicted_cluster}"
             print(f"Searching in predicted cluster: {cluster_key}")
             
-            # Search in the predicted cluster from cache
-            if cluster_key in self.cluster_cache:
-                # Check if exact bitvector exists in predicted cluster
-                if query_bitvector in self.cluster_cache[cluster_key]:
-                    matches = self.cluster_cache[cluster_key][query_bitvector]
-                    for match in matches:
-                        latex_score = 0.0
-                        if query_latex and match.get('latex'):
-                            latex_score = rapidfuzz_similarity(query_latex, match['latex'])
-                        
-                        result = {
-                            'filepath': match['filepath'],
-                            'latex': match['latex'],
-                            'bitvector': query_bitvector,
-                            'cluster': cluster_key,
-                            'similarity': latex_score,
-                            'query_latex': query_latex
-                        }
-                        results.append(result)
-                else:
-                    print(f"Bitvector not found in predicted cluster {cluster_key}")
-                    # Search in neighboring clusters instead of full search
-                    print("Searching in neighboring clusters...")
-                    neighbor_results = self._search_neighboring_clusters(query_bitvector, query_latex, predicted_cluster)
-                    results.extend(neighbor_results)
+            matches = self.db.get_matches(cluster_key, query_bitvector)
+            if matches:
+                results = self._process_matches(matches, query_bitvector, query_latex, cluster_key)
             else:
-                print(f"Predicted cluster {cluster_key} not found in cache")
-                print("Falling back to full search...")
-                return self._search_neighboring_clusters(query_bitvector, query_latex, predicted_cluster)
+                print(f"Bitvector not found in predicted cluster {cluster_key}")
+                print("Searching in neighboring clusters...")
+                neighbor_results = self._search_neighboring_clusters(query_bitvector, query_latex, predicted_cluster)
+                results.extend(neighbor_results)
                 
         except Exception as e:
             print(f"Error during search: {str(e)}")
             print("Traceback:", end="")
             import traceback
             traceback.print_exc()
-            # Fallback to full search on error
             print("Falling back to full search due to error...")
-            return self._search_neighboring_clusters(query_bitvector, query_latex, predicted_cluster)
-
-        # Sort results by similarity score
-        results.sort(key=lambda x: x['similarity'], reverse=True)
-        return results if k is None else results[:k]
-
-    def _search_neighboring_clusters(self, query_bitvector: str, query_latex: str = None, predicted_cluster: int=1) -> List[Dict]:
-        """
-        Search for the bitvector in neighboring clusters
-        
-        Args:
-            query_bitvector: Bitvector string to search for
-            query_latex: Optional LaTeX string for similarity refinement
-            predicted_cluster: The original predicted cluster ID
-            
-        Returns:
-            List of matching results from neighboring clusters
-        """
-        results = []
-        
-        # Calculate distances from query vector to all cluster centroids
-        query_vector = self.bitvector_to_array(query_bitvector).reshape(1, -1)
-      
-        
-        # Calculate distances to all centroids
-        distances = []
-        for i in range(self.kmeans.n_clusters):
-            centroid = self.kmeans.cluster_centers_[i].reshape(1, -1)
-            distance = np.linalg.norm(query_vector - centroid)
-            distances.append((i, distance))
-        
-        # Sort clusters by distance (closest first)
-        distances.sort(key=lambda x: x[1])
-        
-        # Skip the first one as it's the original predicted cluster
-        # Take the next 3 closest clusters (or fewer if there aren't 3)
-        neighbor_clusters = [d[0] for d in distances[1:min(4, len(distances))]]
-        
-        print(f"Checking {len(neighbor_clusters)} neighboring clusters: {neighbor_clusters}")
-        
-        # Search in each neighboring cluster
-        for neighbor_id in neighbor_clusters:
-            neighbor_key = f"C{neighbor_id}"
-            
-            if neighbor_key in self.cluster_cache and query_bitvector in self.cluster_cache[neighbor_key]:
-                print(f"Found match in neighboring cluster {neighbor_key}")
-                matches = self.cluster_cache[neighbor_key][query_bitvector]
-                
-                for match in matches:
-                    latex_score = 0.0
-                    if query_latex and match.get('latex'):
-                        latex_score = rapidfuzz_similarity(query_latex, match['latex'])
-                    
-                    result = {
-                        'filepath': match['filepath'],
-                        'latex': match['latex'],
-                        'bitvector': query_bitvector,
-                        'cluster': neighbor_key,
-                        'similarity': latex_score,
-                        'query_latex': query_latex
-                    }
-                    results.append(result)
-        
-        if not results:
-            print("No matches found in neighboring clusters, falling back to full search")
             return self._full_search(query_bitvector, query_latex)
-            
-        return results
 
-    '''
-    def search(self, query_bitvector: str, query_latex: str = None, k: int = None) -> List[Dict]:
-        """
-        Search for similar expressions using KMeans prediction with neighbor cluster fallback
-        
-        Args:
-            query_bitvector: Bitvector string to search for
-            query_latex: Optional LaTeX string for similarity refinement
-            k: Optional number of results to return
-            
-        Returns:
-            List of matching results sorted by similarity (one result per document)
-        """
-        if not self.kmeans:
-            print("ERROR: Model not fitted or KMeans model not loaded.")
-            print("Please ensure the model has been trained or that a trained model was properly loaded.")
-            return []
-            
-        if not self.training_completed:
-            print("Warning: Searching before training is completed may give inconsistent results")
-            
-        results = []
-        
-        try:
-            print("--------------Using Binary Minibatch KMeans prediction---------------")
-            
-            # Convert bitvector to feature vector and predict cluster
-            query_vector = self.bitvector_to_array(query_bitvector).reshape(1, -1)
-            
-            # Predict the cluster
-            predicted_cluster = self.kmeans.predict(query_vector)[0]
-            cluster_key = f"C{predicted_cluster}"
-            print(f"Searching in predicted cluster: {cluster_key}")
-            
-            # Search in the predicted cluster from cache
-            if cluster_key in self.cluster_cache:
-                # Check if exact bitvector exists in predicted cluster
-                if query_bitvector in self.cluster_cache[cluster_key]:
-                    matches = self.cluster_cache[cluster_key][query_bitvector]
-                    results = self._process_matches(matches, query_bitvector, query_latex, cluster_key)
-                else:
-                    print(f"Bitvector not found in predicted cluster {cluster_key}")
-                    # Search in neighboring clusters instead of full search
-                    print("Searching in neighboring clusters...")
-                    neighbor_results = self._search_neighboring_clusters(query_bitvector, query_latex, predicted_cluster)
-                    results.extend(neighbor_results)
-            else:
-                print(f"Predicted cluster {cluster_key} not found in cache")
-                print("Falling back to full search...")
-                return self._search_neighboring_clusters(query_bitvector, query_latex, predicted_cluster)
-                
-        except Exception as e:
-            print(f"Error during search: {str(e)}")
-            print("Traceback:", end="")
-            import traceback
-            traceback.print_exc()
-            # Fallback to full search on error
-            print("Falling back to full search due to error...")
-            return self._search_neighboring_clusters(query_bitvector, query_latex, predicted_cluster)
-
-        # Deduplicate by filepath and sort results by similarity score
         final_results = self._deduplicate_and_rank_results(results)
         return final_results if k is None else final_results[:k]
 
     def _process_matches(self, matches: List[Dict], query_bitvector: str, query_latex: str, cluster_key: str) -> List[Dict]:
-        """
-        Process matches and calculate similarity scores
-        
-        Args:
-            matches: List of matched documents
-            query_bitvector: The query bitvector
-            query_latex: The query LaTeX string
-            cluster_key: The cluster identifier
-            
-        Returns:
-            List of processed results
-        """
         results = []
-        
         for match in matches:
             latex_score = 0.0
             if query_latex and match.get('latex'):
-                latex_score = rapidfuzz_similarity(query_latex, match['latex'])
+                latex_score = self._prunable_similarity(query_latex, match['latex'])
             
             result = {
                 'filepath': match['filepath'],
@@ -555,81 +389,59 @@ class MathClusterIndex:
                 'query_latex': query_latex
             }
             results.append(result)
-        
         return results
 
-    def _deduplicate_and_rank_results(self, results: List[Dict]) -> List[Dict]:
+    def _prunable_similarity(self, query_latex: str, candidate_latex: str) -> float:
         """
-        Remove duplicate documents and keep only the best match per document
+        Optimized LaTeX string similarity with pruning rules to skip slow RapidFuzz on poor matches.
+        """
+        c_query = canonicalize_latex(query_latex)
+        c_candidate = canonicalize_latex(candidate_latex)
         
-        Args:
-            results: List of all results (may contain duplicates)
+        if c_query == c_candidate:
+            return 1.0
             
-        Returns:
-            List of deduplicated results ranked by similarity
-        """
-        # Group results by filepath
+        q_len = len(c_query)
+        c_len = len(c_candidate)
+        if q_len > 0 and (c_len / q_len < 0.4 or c_len / q_len > 2.5):
+            return 0.0
+            
+        return fuzz.ratio(c_query, c_candidate) / 100.0
+
+    def _deduplicate_and_rank_results(self, results: List[Dict]) -> List[Dict]:
         filepath_groups = {}
-        
         for result in results:
             filepath = result['filepath']
             if filepath not in filepath_groups:
                 filepath_groups[filepath] = []
             filepath_groups[filepath].append(result)
         
-        # For each filepath, keep only the result with highest similarity
         deduplicated_results = []
-        
         for filepath, group in filepath_groups.items():
-            # Sort group by similarity (highest first) and take the best one
             best_result = max(group, key=lambda x: x['similarity'])
             deduplicated_results.append(best_result)
         
-        # Sort final results by similarity score (highest first)
         deduplicated_results.sort(key=lambda x: x['similarity'], reverse=True)
-        
         return deduplicated_results
 
     def _search_neighboring_clusters(self, query_bitvector: str, query_latex: str = None, predicted_cluster: int = 1) -> List[Dict]:
-        """
-        Search for the bitvector in neighboring clusters
-        
-        Args:
-            query_bitvector: Bitvector string to search for
-            query_latex: Optional LaTeX string for similarity refinement
-            predicted_cluster: The original predicted cluster ID
-            
-        Returns:
-            List of matching results from neighboring clusters (deduplicated)
-        """
         results = []
-        
-        # Calculate distances from query vector to all cluster centroids
         query_vector = self.bitvector_to_array(query_bitvector).reshape(1, -1)
-    
-        # Calculate distances to all centroids
         distances = []
         for i in range(self.kmeans.n_clusters):
             centroid = self.kmeans.cluster_centers_[i].reshape(1, -1)
             distance = np.linalg.norm(query_vector - centroid)
             distances.append((i, distance))
         
-        # Sort clusters by distance (closest first)
         distances.sort(key=lambda x: x[1])
-        
-        # Skip the first one as it's the original predicted cluster
-        # Take the next 3 closest clusters (or fewer if there aren't 3)
         neighbor_clusters = [d[0] for d in distances[1:min(4, len(distances))]]
-        
         print(f"Checking {len(neighbor_clusters)} neighboring clusters: {neighbor_clusters}")
         
-        # Search in each neighboring cluster
         for neighbor_id in neighbor_clusters:
             neighbor_key = f"C{neighbor_id}"
-            
-            if neighbor_key in self.cluster_cache and query_bitvector in self.cluster_cache[neighbor_key]:
+            matches = self.db.get_matches(neighbor_key, query_bitvector)
+            if matches:
                 print(f"Found match in neighboring cluster {neighbor_key}")
-                matches = self.cluster_cache[neighbor_key][query_bitvector]
                 cluster_results = self._process_matches(matches, query_bitvector, query_latex, neighbor_key)
                 results.extend(cluster_results)
         
@@ -637,7 +449,36 @@ class MathClusterIndex:
             print("No matches found in neighboring clusters, falling back to full search")
             return self._full_search(query_bitvector, query_latex)
         
-        # Deduplicate and rank before returning
         return self._deduplicate_and_rank_results(results)
 
-
+    def _full_search(self, query_bitvector: str, query_latex: str = None) -> List[Dict]:
+        print("Warning: Performing global search fallback")
+        results = []
+        matches = self.db.get_global_matches(query_bitvector)
+        for match in matches:
+            results.append({
+                'filepath': match['filepath'],
+                'latex': match['latex'],
+                'bitvector': query_bitvector,
+                'cluster': match['cluster_key'],
+                'similarity': self._prunable_similarity(query_latex, match['latex']) if query_latex else 0.0,
+                'query_latex': query_latex
+            })
+            
+        if not results:
+            print("No exact matches found globally. Performing soft Hamming distance search...")
+            query_vector_arr = self.bitvector_to_array(query_bitvector)
+            matching_bitvectors = self.db.get_close_bitvectors(query_vector_arr, threshold=2)
+            for bv, cluster_key in matching_bitvectors:
+                matches = self.db.get_matches(cluster_key, bv)
+                for match in matches:
+                    results.append({
+                        'filepath': match['filepath'],
+                        'latex': match['latex'],
+                        'bitvector': bv,
+                        'cluster': cluster_key,
+                        'similarity': self._prunable_similarity(query_latex, match['latex']) if query_latex else 0.0,
+                        'query_latex': query_latex
+                    })
+                    
+        return self._deduplicate_and_rank_results(results)
