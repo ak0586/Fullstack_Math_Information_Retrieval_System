@@ -1,0 +1,4 @@
+
+first commit locally and then run below command
+
+git subtree push --prefix Math_information_retrieval_system_backend https://huggingface.co/spaces/ankit3105/math-retrieval-backend main

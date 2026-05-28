@@ -161,7 +161,11 @@ class _SearchHomePageState extends State<SearchHomePage>
         _showSnackBar('Search failed. Please try again.', Colors.red);
       }
     } catch (e) {
-      _showSnackBar('Network error. Please check your connection.', Colors.red);
+      print('Connection error: $e');
+      _showSnackBar(
+        'Unable to connect to the backend server. It may be sleeping or offline. Please try again in a few seconds.',
+        Colors.red,
+      );
     } finally {
       setState(() {
         isLoading = false;
