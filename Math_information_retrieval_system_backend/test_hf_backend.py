@@ -31,9 +31,9 @@ try:
     print(f"First result: ID={file_id}, Filename={filename}")
     
     # Step 2: Query /view endpoint
-    view_url = f"{base_url}/search/document"
+    view_url = f"{base_url}/search"
     print(f"\n2. Fetching file view from {view_url}...")
-    view_payload = {"session_id": session_id, "file_id": file_id}
+    view_payload = {"query": f"__VIEW__:{session_id}:{file_id}"}
     view_res = requests.post(view_url, headers=headers, json=view_payload, timeout=15)
     print(f"View Status: {view_res.status_code}")
     print("View Headers:", dict(view_res.headers))

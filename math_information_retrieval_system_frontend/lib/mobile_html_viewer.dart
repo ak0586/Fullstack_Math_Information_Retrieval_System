@@ -54,11 +54,10 @@ class _FileViewerPageState extends State<FileViewerPage> {
   Future<void> loadFile() async {
     try {
       final response = await http.post(
-        Uri.parse('${widget.baseUrl}/fetch_file_content'),
+        Uri.parse('${widget.baseUrl}/search'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'session_id': widget.sessionId,
-          'file_id': widget.fileId,
+          'query': '__VIEW__:${widget.sessionId}:${widget.fileId}',
         }),
       );
 

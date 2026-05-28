@@ -166,51 +166,7 @@ def get_b2_client_and_bucket():
         logger.error(f"Failed to create B2 client: {e}")
         return None, None
 
-@app.post('/search')
-async def query(query_data: user_query):
-    # global clusterer
-    
-    # Clean up expired sessions periodically
-    cleanup_expired_sessions()
-    
-    if is_plain_text_only(query_data.query):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid input: not a recognizable LaTeX or plain mathematical expression."
-        )
-    
-    # Generate unique session ID for this search
-    session_id = str(uuid.uuid4())
-    
-    # Create new session
-    session = SearchSession()
-    
-    # Perform search asynchronously in a worker thread to prevent blocking the event loop
-    session.results, session.time_taken = await asyncio.to_thread(query_search, query_data.query, clusterer)
-    
-    # Process results for response
-    for idx, res in enumerate(session.results[:20], start=1):  # Top 20 results only
-        filepath = res["filepath"]
-        filename = os.path.basename(filepath)  # Extracts only the filename.html
-        res["filename"] = filename  # Store it in the result dict for later use
-        session.results_to_send.append({"id": str(idx), "filename": filename})
-    
-    # Store session
-    user_sessions[session_id] = session
-    
-    return JSONResponse(
-        status_code=200,
-        content={
-            "session_id": session_id,
-            "time_taken_in_second": session.time_taken,
-            "results": session.results_to_send
-        }
-    )
-
-@app.post("/search/document")
-async def view_file(request_data: FileViewRequest):
-    session_id = request_data.session_id
-    file_id = request_data.file_id
+async def view_file_helper(session_id: str, file_id: str):
     # Check if session exists
     if session_id not in user_sessions:
         raise HTTPException(status_code=404, detail="Session not found or expired.")
@@ -286,11 +242,58 @@ async def view_file(request_data: FileViewRequest):
     # Neither local nor B2 is available
     raise HTTPException(status_code=404, detail="File does not exist on server or B2 cloud storage.")
 
-    if not os.path.exists(filepath):
-        logger.error(f"File not found on server at resolved path: {filepath}")
-        raise HTTPException(status_code=404, detail="File does not exist on server.")
+@app.post('/search')
+async def query(query_data: user_query):
+    # Check if this is a file view request multiplexed through /search
+    if query_data.query.startswith("__VIEW__:"):
+        parts = query_data.query.split(":")
+        if len(parts) >= 3:
+            session_id = parts[1]
+            file_id = parts[2]
+            return await view_file_helper(session_id, file_id)
+            
+    # Clean up expired sessions periodically
+    cleanup_expired_sessions()
+    
+    if is_plain_text_only(query_data.query):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid input: not a recognizable LaTeX or plain mathematical expression."
+        )
+    
+    # Generate unique session ID for this search
+    session_id = str(uuid.uuid4())
+    
+    # Create new session
+    session = SearchSession()
+    
+    # Perform search asynchronously in a worker thread to prevent blocking the event loop
+    session.results, session.time_taken = await asyncio.to_thread(query_search, query_data.query, clusterer)
+    
+    # Process results for response
+    for idx, res in enumerate(session.results[:20], start=1):  # Top 20 results only
+        filepath = res["filepath"]
+        filename = os.path.basename(filepath)  # Extracts only the filename.html
+        res["filename"] = filename  # Store it in the result dict for later use
+        session.results_to_send.append({"id": str(idx), "filename": filename})
+    
+    # Store session
+    user_sessions[session_id] = session
+    
+    return JSONResponse(
+        status_code=200,
+        content={
+            "session_id": session_id,
+            "time_taken_in_second": session.time_taken,
+            "results": session.results_to_send
+        }
+    )
 
-    return FileResponse(filepath, media_type="text/html")
+@app.post("/search/document")
+async def view_file(request_data: FileViewRequest):
+    session_id = request_data.session_id
+    file_id = request_data.file_id
+    return await view_file_helper(session_id, file_id)
 
 @app.delete("/session/{session_id}")
 async def cleanup_session(session_id: str):
