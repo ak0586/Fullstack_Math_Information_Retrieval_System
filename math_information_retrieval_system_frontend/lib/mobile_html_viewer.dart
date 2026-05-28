@@ -54,7 +54,7 @@ class _FileViewerPageState extends State<FileViewerPage> {
     try {
       final response = await http.get(
         Uri.parse(
-          '${widget.baseUrl}/view/${widget.sessionId}/${widget.fileId}',
+          '${widget.baseUrl}/document/${widget.sessionId}/${widget.fileId}',
         ),
       );
 

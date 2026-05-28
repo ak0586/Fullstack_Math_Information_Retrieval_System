@@ -203,7 +203,7 @@ async def query(query_data: user_query):
         }
     )
 
-@app.get("/view/{session_id}/{file_id}")
+@app.get("/document/{session_id}/{file_id}")
 async def view_file(session_id: str, file_id: str):
     # Check if session exists
     if session_id not in user_sessions:
