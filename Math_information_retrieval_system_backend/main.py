@@ -26,6 +26,10 @@ logger = logging.getLogger("uvicorn.error")
 class user_query(BaseModel):
     query: str
 
+class FileViewRequest(BaseModel):
+    session_id: str
+    file_id: str
+
 class SearchSession:
     """Class to store search session data for each user"""
     def __init__(self):
@@ -203,8 +207,10 @@ async def query(query_data: user_query):
         }
     )
 
-@app.get("/fetch_file_content/{session_id}/{file_id}")
-async def view_file(session_id: str, file_id: str):
+@app.post("/fetch_file_content")
+async def view_file(request_data: FileViewRequest):
+    session_id = request_data.session_id
+    file_id = request_data.file_id
     # Check if session exists
     if session_id not in user_sessions:
         raise HTTPException(status_code=404, detail="Session not found or expired.")

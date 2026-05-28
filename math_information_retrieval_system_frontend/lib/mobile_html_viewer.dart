@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class FileViewerPage extends StatefulWidget {
@@ -52,10 +53,13 @@ class _FileViewerPageState extends State<FileViewerPage> {
 
   Future<void> loadFile() async {
     try {
-      final response = await http.get(
-        Uri.parse(
-          '${widget.baseUrl}/document/${widget.sessionId}/${widget.fileId}',
-        ),
+      final response = await http.post(
+        Uri.parse('${widget.baseUrl}/fetch_file_content'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'session_id': widget.sessionId,
+          'file_id': widget.fileId,
+        }),
       );
 
       if (response.statusCode == 200) {

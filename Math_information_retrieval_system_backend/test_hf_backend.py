@@ -31,9 +31,10 @@ try:
     print(f"First result: ID={file_id}, Filename={filename}")
     
     # Step 2: Query /view endpoint
-    view_url = f"{base_url}/fetch_file_content/{session_id}/{file_id}"
+    view_url = f"{base_url}/fetch_file_content"
     print(f"\n2. Fetching file view from {view_url}...")
-    view_res = requests.get(view_url, timeout=15)
+    view_payload = {"session_id": session_id, "file_id": file_id}
+    view_res = requests.post(view_url, headers=headers, json=view_payload, timeout=15)
     print(f"View Status: {view_res.status_code}")
     print("View Headers:", dict(view_res.headers))
     if view_res.status_code == 200:

@@ -2,6 +2,7 @@
 // Web-specific HTML viewer with modern web APIs
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:web/web.dart' as web;
 import 'dart:ui_web' as ui_web;
 import 'dart:js_interop' as js;
@@ -44,10 +45,13 @@ class _FileViewerPageState extends State<FileViewerPage> {
     });
 
     try {
-      final response = await http.get(
-        Uri.parse(
-          '${widget.baseUrl}/document/${widget.sessionId}/${widget.fileId}',
-        ),
+      final response = await http.post(
+        Uri.parse('${widget.baseUrl}/fetch_file_content'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'session_id': widget.sessionId,
+          'file_id': widget.fileId,
+        }),
       );
 
       if (response.statusCode == 200) {
