@@ -27,8 +27,8 @@ COPY . .
 # Create persist directories for index database and dataset
 RUN mkdir -p /app/math_index_storage /app/Dataset
 
-# Expose port 8000
-EXPOSE 8000
+# Expose port 7860 for Hugging Face Spaces
+EXPOSE 7860
 
 # Command to run the application using uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
