@@ -93,8 +93,13 @@ class _FileViewerPageState extends State<FileViewerPage> {
           ),
         );
 
-        // Wrap with MathJax support
-        final enhancedHtml = _createEnhancedHtml(htmlContent);
+        // Strip any existing MathJax scripts from the file content to avoid
+        // conflicts between MathJax v2 (cdn.mathjax.org in the files) and
+        // our injected MathJax v3 (cdn.jsdelivr.net).
+        final cleanedHtml = _stripExistingMathJax(htmlContent);
+
+        // Wrap with MathJax v3 support
+        final enhancedHtml = _createEnhancedHtml(cleanedHtml);
 
         // Update the already-registered iframe's srcdoc directly.
         // This works because the factory returned the same element instance.
@@ -126,6 +131,30 @@ class _FileViewerPageState extends State<FileViewerPage> {
         errorMessage = e.toString();
       });
     }
+  }
+
+  /// Remove legacy MathJax v2 script tags from the raw HTML so they don't
+  /// conflict with our injected MathJax v3 (cdn.jsdelivr.net).
+  String _stripExistingMathJax(String html) {
+    // Remove <script> tags that reference mathjax (any CDN/version)
+    String cleaned = html.replaceAllMapped(
+      RegExp(
+        r'<script[^>]*mathjax[^>]*>.*?</script>',
+        caseSensitive: false,
+        dotAll: true,
+      ),
+      (_) => '',
+    );
+    // Also remove MathJax config script blocks
+    cleaned = cleaned.replaceAllMapped(
+      RegExp(
+        r'<script[^>]*type=["\']text/x-mathjax-config["\'][^>]*>.*?</script>',
+        caseSensitive: false,
+        dotAll: true,
+      ),
+      (_) => '',
+    );
+    return cleaned;
   }
 
   String _createEnhancedHtml(String htmlContent) {

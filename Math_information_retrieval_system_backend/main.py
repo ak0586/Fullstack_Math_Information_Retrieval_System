@@ -238,20 +238,49 @@ async def view_file_helper(session_id: str, file_id: str):
     # Fallback: Private streaming from Backblaze B2 (safe for Private buckets!)
     s3_client, bucket_name = get_b2_client_and_bucket()
     if s3_client and bucket_name:
-        try:
-            # B2 bucket structure for TextArticles is flat
-            b2_key = relative_path
-            if 'TextArticles/' in b2_key:
-                b2_key = f"TextArticles/{os.path.basename(b2_key)}"
+        filename_only = os.path.basename(relative_path)
+        
+        # Build a list of candidate B2 keys to try in order.
+        # The B2 bucket may only have certain wpmath subfolders uploaded,
+        # so we fall back through progressively simpler paths.
+        candidate_keys = []
+        
+        if 'TextArticles/' in relative_path:
+            # TextArticles on B2 is flat (no subfolders)
+            candidate_keys.append(f"TextArticles/{filename_only}")
+        elif 'MathTagArticles/' in relative_path:
+            # Primary: exact path from DB
+            candidate_keys.append(relative_path)
+            # Fallback 1: same filename but under wpmath0000001 (most common on B2)
+            candidate_keys.append(f"MathTagArticles/wpmath0000001/Articles/{filename_only}")
+            # Fallback 2: flat in MathTagArticles root
+            candidate_keys.append(f"MathTagArticles/{filename_only}")
+        else:
+            candidate_keys.append(relative_path)
+            candidate_keys.append(filename_only)
+        
+        last_error = None
+        for b2_key in candidate_keys:
+            try:
+                logger.info(f"Fetching {b2_key} privately from B2...")
+                response = s3_client.get_object(Bucket=bucket_name, Key=b2_key)
+                html_content = response['Body'].read().decode('utf-8')
+                encoded_html = base64.b64encode(html_content.encode('utf-8')).decode('utf-8')
+                logger.info(f"Successfully fetched {b2_key} from B2")
+                return JSONResponse(status_code=200, content={"html": encoded_html})
+            except Exception as e:
+                err_code = ""
+                if hasattr(e, 'response') and isinstance(e.response, dict):
+                    err_code = e.response.get('Error', {}).get('Code', '')
+                if err_code in ('NoSuchKey', '404', 'NotFound'):
+                    logger.warning(f"B2 key not found: {b2_key}, trying next fallback...")
+                else:
+                    logger.error(f"Error fetching {b2_key} from B2: {e}")
+                last_error = e
+                continue
                 
-            logger.info(f"Fetching {b2_key} privately from B2...")
-            response = s3_client.get_object(Bucket=bucket_name, Key=b2_key)
-            html_content = response['Body'].read().decode('utf-8')
-            encoded_html = base64.b64encode(html_content.encode('utf-8')).decode('utf-8')
-            return JSONResponse(status_code=200, content={"html": encoded_html})
-        except Exception as e:
-            logger.error(f"Error fetching {relative_path} from B2: {e}")
-            raise HTTPException(status_code=500, detail="Failed to fetch file from cloud storage.")
+        logger.error(f"All B2 fallback paths exhausted for {filename_only}. Last error: {last_error}")
+        raise HTTPException(status_code=500, detail=f"File '{filename_only}' not found in cloud storage.")
             
     # Neither local nor B2 is available
     raise HTTPException(status_code=404, detail="File does not exist on server or B2 cloud storage.")
