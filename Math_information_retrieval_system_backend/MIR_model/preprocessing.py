@@ -194,6 +194,88 @@ def analyze_single_mathml(mathml_string: str, symbol_table: MathSymbolBitVector)
         return '', ''
 
 
+def analyze_single_mathml_tag(math_tag, symbol_table: MathSymbolBitVector) -> Tuple[str, str]:
+    """
+    Analyze a parsed MathML BeautifulSoup Tag object and return its bit vector and LaTeX representation.
+    Avoids re-parsing the MathML element, yielding substantial performance gains.
+    """
+    try:
+        if math_tag:
+            # 1. Extract LaTeX
+            latex = ""
+            annotations = [
+                {'encoding': 'application/x-tex'},
+                {'encoding': 'text/x-tex'},
+                {'encoding': 'TeX'},
+                {'encoding': 'text/tex'},
+                {}  # Try any annotation as last resort
+            ]
+            
+            for annotation_attrs in annotations:
+                annotation = math_tag.find('annotation', annotation_attrs)
+                if annotation and annotation.string:
+                    latex = annotation.string.strip()
+                    if latex:
+                        break
+            
+            if not latex:
+                semantics = math_tag.find('semantics')
+                if semantics:
+                    latex = ' '.join(semantics.stripped_strings)
+            
+            if not latex:
+                latex = ' '.join(math_tag.stripped_strings)
+
+            # 2. Get pure MathML content without annotations
+            for annotation in math_tag.find_all(['annotation', 'annotation-xml']):
+                annotation.decompose()
+                
+            content = []
+            for element in math_tag.find_all(True):
+                if element.name not in ['math', 'semantics']:
+                    if element.string and element.string.strip():
+                        content.append(element.string.strip())
+            expression = ' '.join(content)
+            
+            # Check structures
+            has_mfrac = bool(math_tag.find('mfrac'))
+            has_msubsup = bool(math_tag.find('msubsup'))
+            has_msup = bool(math_tag.find('msup'))
+            has_msub = bool(math_tag.find('msub'))
+            has_mtable = bool(math_tag.find('mtable'))
+            has_mover = bool(math_tag.find('mover'))
+            has_munder = bool(math_tag.find('munder'))
+            has_munderover = bool(math_tag.find('munderover'))
+            has_msqrt = bool(math_tag.find('msqrt'))
+            has_mroot = bool(math_tag.find('mroot'))
+            has_mfenced = bool(math_tag.find('mfenced'))
+            
+            if expression:
+                bit_vector = symbol_table.generate_bit_vector(
+                    expression,
+                    has_mfrac=has_mfrac,
+                    has_msubsup=has_msubsup,
+                    has_msup=has_msup,
+                    has_msub=has_msub,
+                    has_mtable=has_mtable,
+                    has_mover=has_mover,
+                    has_munder=has_munder,
+                    has_munderover=has_munderover,
+                    has_msqrt=has_msqrt,
+                    has_mroot=has_mroot,
+                    has_mfenced=has_mfenced,
+                )
+                
+                if bit_vector:
+                    return bit_vector, latex
+        
+        return '', ''
+        
+    except Exception as e:
+        print(f"Error in analyze_single_mathml_tag: {str(e)}")
+        return '', ''
+
+
 class FileProcessingTracker:
     def __init__(self, db: MIRDatabase):
         self.db = db
@@ -211,7 +293,20 @@ class FileProcessingTracker:
         return self.db.is_file_processed(file_path)
 
     def get_unprocessed_files(self, all_files: list) -> list:
-        return self.db.get_unprocessed_files(all_files)
+        # Load processed B2 keys from the database
+        conn = self.db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT filepath FROM processed_files")
+        processed = {row[0] for row in cursor.fetchall()}
+        conn.close()
+        
+        # Filter all_files by mapping their local path to B2 keys
+        unprocessed = []
+        for f in all_files:
+            b2_key = map_to_b2_key(f)
+            if b2_key not in processed:
+                unprocessed.append(f)
+        return unprocessed
 
 
 class ProcessingStats:
@@ -293,7 +388,7 @@ def process_html_file_worker(args) -> Optional[Tuple[str, List[Dict[str, str]]]]
 
     math_list = []
     for mathml in mathml_expressions:
-        bit_vector, latex = analyze_single_mathml(str(mathml), symbol_table)
+        bit_vector, latex = analyze_single_mathml_tag(mathml, symbol_table)
         if bit_vector and latex:
             math_list.append({'bit_vector': bit_vector, 'latex': latex})
 
@@ -382,7 +477,7 @@ def preprocess_dataset(folder_path: str, symbol_table, batch_size=1000, tracker_
         from concurrent.futures import ProcessPoolExecutor
         import multiprocessing
         
-        num_workers = min(multiprocessing.cpu_count(), 8)
+        num_workers = multiprocessing.cpu_count()
         categories = symbol_table.categories
         worker_args = [(f, categories) for f in files_to_process]
         

@@ -60,7 +60,7 @@ class MIRDatabase:
         """Mark a single file as processed"""
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute("INSERT OR IGNORE INTO processed_files (filepath) VALUES (?)", (os.path.abspath(filepath),))
+        cursor.execute("INSERT OR IGNORE INTO processed_files (filepath) VALUES (?)", (filepath,))
         conn.commit()
         conn.close()
 
@@ -71,7 +71,7 @@ class MIRDatabase:
         conn = self.get_connection()
         cursor = conn.cursor()
         cursor.executemany("INSERT OR IGNORE INTO processed_files (filepath) VALUES (?)", 
-                           [(os.path.abspath(fp),) for fp in filepaths])
+                           [(fp,) for fp in filepaths])
         conn.commit()
         conn.close()
 
@@ -79,7 +79,7 @@ class MIRDatabase:
         """Check if a file has already been processed"""
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT 1 FROM processed_files WHERE filepath = ?", (os.path.abspath(filepath),))
+        cursor.execute("SELECT 1 FROM processed_files WHERE filepath = ?", (filepath,))
         res = cursor.fetchone()
         conn.close()
         return res is not None
@@ -91,7 +91,7 @@ class MIRDatabase:
         cursor.execute("SELECT filepath FROM processed_files")
         processed = {row[0] for row in cursor.fetchall()}
         conn.close()
-        return [f for f in all_files if os.path.abspath(f) not in processed]
+        return [f for f in all_files if f not in processed]
 
     # --- Math Expression Operations ---
 
