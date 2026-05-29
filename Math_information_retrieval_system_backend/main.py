@@ -177,8 +177,10 @@ def get_b2_client_and_bucket():
         return None, None
 
 async def view_file_helper(session_id: str, file_id: str):
+    logger.info(f"[VIEW REQUEST] session_id={session_id} file_id={file_id}")
     # Check if session exists
     if session_id not in user_sessions:
+        logger.warning(f"[VIEW REQUEST] Session not found: {session_id}")
         raise HTTPException(status_code=404, detail="Session not found or expired.")
     
     session = user_sessions[session_id]
@@ -186,13 +188,16 @@ async def view_file_helper(session_id: str, file_id: str):
     # Find filename for given id
     file_entry = next((item for item in session.results_to_send if item["id"] == file_id), None)
     if not file_entry:
+        logger.warning(f"[VIEW REQUEST] File ID not found: {file_id} in session {session_id}")
         raise HTTPException(status_code=404, detail="File ID not found.")
 
     filename = file_entry["filename"]
+    logger.info(f"[VIEW REQUEST] Serving file: {filename}")
 
     # Find full path using filename
     full_entry = next((item for item in session.results if item.get("filename") == filename), None)
     if not full_entry:
+        logger.warning(f"[VIEW REQUEST] File path not found for: {filename}")
         raise HTTPException(status_code=404, detail="File path not found.")
 
     db_filepath = full_entry["filepath"]
@@ -259,6 +264,7 @@ async def query(query_data: user_query):
         if len(parts) >= 3:
             session_id = parts[1]
             file_id = parts[2]
+            logger.info(f"[SEARCH] Multiplexed view request: session={session_id} file={file_id}")
             return await view_file_helper(session_id, file_id)
             
     # Clean up expired sessions periodically

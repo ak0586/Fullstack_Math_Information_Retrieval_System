@@ -28,13 +28,41 @@ class FileViewerPage extends StatefulWidget {
 class _FileViewerPageState extends State<FileViewerPage> {
   bool isLoading = true;
   bool hasError = false;
-  late String viewId;
+  String? errorMessage;
+
+  // A unique, stable view ID for this page instance.
+  // Using a static counter ensures each FileViewerPage gets a unique ID
+  // even if the same file is opened multiple times.
+  static int _viewCounter = 0;
+  late final String viewId;
+
+  // The iframe element – created once per page instance.
+  late final web.HTMLIFrameElement _iframeElement;
+
+  // Track which viewIds have been registered to avoid double-registration.
+  static final Set<String> _registeredViewIds = {};
 
   @override
   void initState() {
     super.initState();
-    viewId =
-        'html-viewer-${widget.fileId}-${DateTime.now().millisecondsSinceEpoch}';
+    _viewCounter++;
+    viewId = 'html-viewer-${widget.fileId}-$_viewCounter';
+
+    // Create the iframe element once
+    _iframeElement = web.HTMLIFrameElement()
+      ..style.width = '100%'
+      ..style.height = '100%'
+      ..style.border = 'none';
+
+    // Register the platform view factory ONCE per viewId
+    if (!_registeredViewIds.contains(viewId)) {
+      _registeredViewIds.add(viewId);
+      ui_web.platformViewRegistry.registerViewFactory(
+        viewId,
+        (int id) => _iframeElement,
+      );
+    }
+
     loadFile();
   }
 
@@ -42,6 +70,7 @@ class _FileViewerPageState extends State<FileViewerPage> {
     setState(() {
       isLoading = true;
       hasError = false;
+      errorMessage = null;
     });
 
     try {
@@ -56,48 +85,55 @@ class _FileViewerPageState extends State<FileViewerPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final encodedHtml = data['html'] as String;
-        final htmlContent = utf8.decode(base64.decode(encodedHtml.replaceAll('\n', '').replaceAll('\r', '').trim()));
-        // Create enhanced HTML with better MathML support for web
+
+        // Decode base64 → UTF-8 HTML string
+        final htmlContent = utf8.decode(
+          base64.decode(
+            encodedHtml.replaceAll('\n', '').replaceAll('\r', '').trim(),
+          ),
+        );
+
+        // Wrap with MathJax support
         final enhancedHtml = _createEnhancedHtml(htmlContent);
 
-        // Create iframe element using modern web API
-        final iframeElement = web.HTMLIFrameElement()
-          ..style.width = '100%'
-          ..style.height = '100%'
-          ..style.border = 'none'
-          ..srcdoc = enhancedHtml.toJS;
-
-        // Register the iframe element
-        ui_web.platformViewRegistry.registerViewFactory(
-          viewId,
-          (int viewId) => iframeElement,
-        );
+        // Update the already-registered iframe's srcdoc directly.
+        // This works because the factory returned the same element instance.
+        _iframeElement.srcdoc = enhancedHtml.toJS;
 
         setState(() {
           isLoading = false;
           hasError = false;
         });
       } else {
+        String detail = 'Unknown error';
+        try {
+          final errData = json.decode(response.body);
+          detail = errData['detail'] ?? 'HTTP ${response.statusCode}';
+        } catch (_) {
+          detail = 'HTTP ${response.statusCode}';
+        }
         setState(() {
           isLoading = false;
           hasError = true;
+          errorMessage = detail;
         });
       }
     } catch (e) {
-      print('Error loading file: $e');
+      debugPrint('Error loading file: $e');
       setState(() {
         isLoading = false;
         hasError = true;
+        errorMessage = e.toString();
       });
     }
   }
 
   String _createEnhancedHtml(String htmlContent) {
-    return '''
-<!DOCTYPE html>
+    return '''<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="text/javascript" id="MathJax-script" async
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/mml-chtml.js">
     </script>
@@ -106,6 +142,7 @@ class _FileViewerPageState extends State<FileViewerPage> {
         margin: 10px;
         padding: 5px;
         font-family: sans-serif;
+        line-height: 1.6;
       }
       mjx-container {
         all: unset;
@@ -120,8 +157,7 @@ class _FileViewerPageState extends State<FileViewerPage> {
   <body>
     $htmlContent
   </body>
-</html>
-''';
+</html>''';
   }
 
   @override
@@ -145,9 +181,7 @@ class _FileViewerPageState extends State<FileViewerPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: () {
-              loadFile();
-            },
+            onPressed: loadFile,
           ),
         ],
       ),
@@ -184,6 +218,19 @@ class _FileViewerPageState extends State<FileViewerPage> {
                       color: Colors.grey,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  if (errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 8),
                   const Text(
                     'Please try again or go back',
