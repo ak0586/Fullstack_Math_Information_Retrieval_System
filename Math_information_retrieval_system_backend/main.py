@@ -135,6 +135,15 @@ def get_b2_client_and_bucket():
     endpoint_url = os.getenv("B2_ENDPOINT_URL", "https://s3.eu-central-003.backblazeb2.com")
     bucket_name = os.getenv("B2_BUCKET_NAME", "math-ntcir-12-dataset")
     
+    if key_id:
+        key_id = key_id.strip()
+    if application_key:
+        application_key = application_key.strip()
+    if endpoint_url:
+        endpoint_url = endpoint_url.strip()
+    if bucket_name:
+        bucket_name = bucket_name.strip()
+    
     # Fallback to backblaze.txt
     if not key_id or not application_key:
         backend_dir = os.path.dirname(os.path.abspath(__file__))
