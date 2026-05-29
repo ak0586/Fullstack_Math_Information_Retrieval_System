@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:web/web.dart' as web;
 import 'dart:ui_web' as ui_web;
-import 'dart:js_interop' as js;
+import 'dart:js_interop';
 
 class FileViewerPage extends StatefulWidget {
   final String sessionId;
@@ -22,6 +22,7 @@ class FileViewerPage extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _FileViewerPageState createState() => _FileViewerPageState();
 }
 
@@ -145,10 +146,10 @@ class _FileViewerPageState extends State<FileViewerPage> {
       ),
       (_) => '',
     );
-    // Also remove MathJax config script blocks
+    // Also remove MathJax config script blocks (type="text/x-mathjax-config")
     cleaned = cleaned.replaceAllMapped(
       RegExp(
-        r'<script[^>]*type=["\']text/x-mathjax-config["\'][^>]*>.*?</script>',
+        r"""<script[^>]*type=["']text/x-mathjax-config["'][^>]*>.*?</script>""",
         caseSensitive: false,
         dotAll: true,
       ),
